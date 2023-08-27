@@ -32,6 +32,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void _incrementCounter() {
     setState(() {
@@ -42,47 +43,49 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(64)),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.menu_rounded),
-                ),
-                const SizedBox(width: 4),
-                const Expanded(
-                    flex: 1,
-                    child: TextField(
-                      decoration: InputDecoration(
-                          hintText: "Search your memos",
-                          border: InputBorder.none),
-                    )),
-                const SizedBox(width: 4),
-                IconButton(
-                  onPressed: () {},
-                  padding: const EdgeInsets.all(4),
-                  icon: Container(
-                    width: 28,
-                    height: 28,
-                    clipBehavior: Clip.hardEdge,
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(14)),
-                    child: Image.network(
-                        "https://lh3.googleusercontent.com/a/AAcHTtclbC8tqgAwbxh9LTCRTjVOFr0rw7xDjEisPO0Z-33uLdY=s288-c-no"),
-                  ),
-                )
-              ]),
+      key: _scaffoldKey,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Container(
+          decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(64)),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(children: [
+            IconButton(
+              onPressed: () {
+                _scaffoldKey.currentState!.openDrawer();
+              },
+              icon: const Icon(Icons.menu_rounded),
             ),
-          ),
-        ],
+            const Expanded(
+                flex: 1,
+                child: TextField(
+                  decoration: InputDecoration(
+                      hintText: "Search your memos", border: InputBorder.none),
+                )),
+            IconButton(
+              onPressed: () {},
+              padding: const EdgeInsets.all(4),
+              icon: Container(
+                width: 32,
+                height: 32,
+                padding: const EdgeInsets.all(1),
+                clipBehavior: Clip.hardEdge,
+                decoration: BoxDecoration(
+                  color: Colors.black.withAlpha(40),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const CircleAvatar(
+                  backgroundImage: NetworkImage(
+                      "https://lh3.googleusercontent.com/a/AAcHTtclbC8tqgAwbxh9LTCRTjVOFr0rw7xDjEisPO0Z-33uLdY=s288-c-no"),
+                ),
+              ),
+            )
+          ]),
+        ),
       ),
+      body: const Center(child: Text("No memos")),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         elevation: 0,
@@ -91,6 +94,19 @@ class _MyHomePageState extends State<MyHomePage> {
         highlightElevation: 0,
         disabledElevation: 0,
         child: const Icon(Icons.add_rounded),
+      ),
+      drawer: Drawer(
+        width: 200,
+        child: ListView(children: const [
+          ListTile(
+            leading: Icon(Icons.sticky_note_2_rounded),
+            title: Text("Notes"),
+          ),
+          ListTile(
+            leading: Icon(Icons.archive_rounded),
+            title: Text("Archive"),
+          ),
+        ]),
       ),
     );
   }
