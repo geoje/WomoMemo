@@ -76,8 +76,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.black.withAlpha(40),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const CircleAvatar(
-                  backgroundImage: NetworkImage(
+                child: CircleAvatar(
+                  backgroundColor: Colors.black.withAlpha(40),
+                  backgroundImage: const NetworkImage(
                       "https://lh3.googleusercontent.com/a/AAcHTtclbC8tqgAwbxh9LTCRTjVOFr0rw7xDjEisPO0Z-33uLdY=s288-c-no"),
                 ),
               ),
@@ -93,18 +94,39 @@ class _MyHomePageState extends State<MyHomePage> {
         hoverElevation: 0,
         highlightElevation: 0,
         disabledElevation: 0,
+        backgroundColor: Colors.yellow.shade400,
         child: const Icon(Icons.add_rounded),
       ),
       drawer: Drawer(
-        width: 200,
-        child: ListView(children: const [
+        child: ListView(children: [
+          const SizedBox(height: 80),
+          Center(
+            child: SizedBox(
+              width: 80,
+              height: 80,
+              child: Image.asset("assets/Icon-512.png"),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: Text(
+              "WomoMemo",
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800),
+            ),
+          ),
+          const SizedBox(height: 80),
           ListTile(
-            leading: Icon(Icons.sticky_note_2_rounded),
-            title: Text("Notes"),
+            leading: const Icon(Icons.sticky_note_2_rounded),
+            title: const Text("Notes"),
+            onTap: () {},
           ),
           ListTile(
-            leading: Icon(Icons.archive_rounded),
-            title: Text("Archive"),
+            leading: const Icon(Icons.archive_rounded),
+            title: const Text("Archive"),
+            onTap: () {},
           ),
         ]),
       ),
