@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "womomemo" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "womomemo" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.womosoft. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 Womosoft All rights reserved." "\0"
             VALUE "OriginalFilename", "womomemo.exe" "\0"
             VALUE "ProductName", "womomemo" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

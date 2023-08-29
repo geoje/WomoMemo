@@ -1,4 +1,4 @@
-package com.womosoft.womomemo
+package com.womosoft.memo
 
 import io.flutter.embedding.android.FlutterActivity
 

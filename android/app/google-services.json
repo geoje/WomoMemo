@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "296416469462",
+    "project_id": "womoso",
+    "storage_bucket": "womoso.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296416469462:android:e73ca6a4ac9a9aa06c4477",
+        "android_client_info": {
+          "package_name": "com.womosoft.memo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "296416469462-272prvd310ritv5n2fn43o616db7s6rv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCTsOF_ucopN2EVO-nGkO1_6hfc4vqoT8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "296416469462-272prvd310ritv5n2fn43o616db7s6rv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "296416469462-6fh017s9dhspvf6mnei96n2ouqs522u1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.womosoft.womomemo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
