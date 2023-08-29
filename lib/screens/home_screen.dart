@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       hintText: "Search your memos", border: InputBorder.none),
                 )),
             user == null
-                ? IconButton.filled(
+                ? TextButton.icon(
                     onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -59,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       backgroundColor: Colors.black.withAlpha(20),
                     ),
                     icon: const Icon(Icons.login_rounded),
+                    label: const Text("Login"),
                   )
                 : IconButton(
                     onPressed: () {

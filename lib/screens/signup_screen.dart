@@ -1,18 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:womomemo/screens/signup_screen.dart';
 import 'package:womomemo/widgets/auth_header_widget.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   var pwVisible = false, authenticating = false;
   String errorMessage = "";
+
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -22,9 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(),
       body: ListView(
         children: [
-          const AuthHeaderWidget(
-            title: "Login",
-          ),
+          const AuthHeaderWidget(title: "Sign Up"),
           Center(
             child: SizedBox(
               width: 300,
@@ -62,24 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          Center(
-            child: SizedBox(
-              width: 316,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: handleForgot,
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: const EdgeInsets.all(8),
-                    ),
-                    child: const Text("Forgot password"),
-                  ),
-                ],
-              ),
-            ),
-          ),
           const SizedBox(height: 20),
           SizedBox(
             height: 60,
@@ -97,20 +77,9 @@ class _LoginScreenState extends State<LoginScreen> {
           Center(
             child: SizedBox(
               width: 300,
-              child: FilledButton.icon(
-                onPressed: authenticating ? null : handleLogin,
-                icon: const Icon(Icons.login_rounded),
-                label: const Text("Login"),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Center(
-            child: SizedBox(
-              width: 300,
-              child: OutlinedButton(
-                onPressed: handleSignUp,
-                child: const Text("Create new account"),
+              child: FilledButton(
+                onPressed: authenticating ? null : handleSignUp,
+                child: const Text("Create"),
               ),
             ),
           ),
@@ -120,11 +89,10 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void handleForgot() {}
-  void handleLogin() async {
+  void handleSignUp() async {
     try {
-      setState(() => authenticating = true);
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
@@ -138,18 +106,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   : e.code == "wrong-password"
                       ? "The password is invalid for the given email, or the account corresponding to the email does not have a password set"
                       : "Unexpected auth exception!";
+      setState(() {});
     } catch (e) {
       errorMessage = "Unexpected exception!";
     }
     setState(() => authenticating = false);
-  }
-
-  void handleSignUp() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const SignUpScreen(),
-      ),
-    );
   }
 }
