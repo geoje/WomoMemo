@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -9,6 +10,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   var pwVisible = false;
+  String? errorMessage;
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +37,12 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           const SizedBox(height: 100),
-          const Center(
+          Center(
             child: SizedBox(
               width: 300,
               child: TextField(
-                decoration: InputDecoration(
+                controller: emailController,
+                decoration: const InputDecoration(
                     icon: Icon(Icons.person_outline_rounded),
                     hintText: "Email"),
               ),
@@ -47,6 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SizedBox(
               width: 300,
               child: TextField(
+                controller: passwordController,
                 obscureText: !pwVisible,
                 decoration: InputDecoration(
                   icon: const Icon(Icons.key_rounded),
@@ -68,11 +74,21 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           const SizedBox(height: 40),
+          errorMessage == null
+              ? const SizedBox()
+              : Center(
+                  child: Text(
+                  errorMessage!,
+                  style: const TextStyle(
+                    color: Colors.red,
+                  ),
+                )),
+          const SizedBox(height: 40),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: handleJoin,
                 icon: const Icon(Icons.person_add_alt_rounded),
                 label: const Text("Join"),
               ),
@@ -80,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: 200,
                 child: FilledButton.icon(
-                  onPressed: () {},
+                  onPressed: handleLogin,
                   icon: const Icon(Icons.login_rounded),
                   label: const Text("Login"),
                 ),
@@ -92,4 +108,26 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+  void handleLogin() async {
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+    } on FirebaseAuthException catch (e) {
+      errorMessage = e.code == "invalid-email"
+          ? "The email address is not valid"
+          : e.code == "user-disabled"
+              ? "The user corresponding to the given email has been disabled"
+              : e.code == "user-not-found"
+                  ? "There is no user corresponding to the given email"
+                  : e.code == "wrong-password"
+                      ? "The password is invalid for the given email, or the account corresponding to the email does not have a password set"
+                      : "Unexpected error!";
+      setState(() {});
+    }
+  }
+
+  void handleJoin() async {}
 }
