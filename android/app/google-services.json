@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "296416469462-272prvd310ritv5n2fn43o616db7s6rv.apps.googleusercontent.com",
+          "client_id": "296416469462-och32t0u8kp8h28ek9a1b3pbfpffpoe1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.womosoft.memo",
+            "certificate_hash": "b0b3d2ae551ba033d659595f02449673a97c6997"
+          }
+        },
+        {
+          "client_id": "296416469462-dueh0ffs1a986he3pneiopv9googbf0l.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -31,10 +39,10 @@
               "client_type": 3
             },
             {
-              "client_id": "296416469462-6fh017s9dhspvf6mnei96n2ouqs522u1.apps.googleusercontent.com",
+              "client_id": "296416469462-2bgdlhhgqionh12dauc82eqqf8pvsce9.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.womosoft.womomemo"
+                "bundle_id": "com.womosoft.memo"
               }
             }
           ]

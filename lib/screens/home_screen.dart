@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:womomemo/screens/login_screen.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.title});
@@ -14,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   User? user;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late GoogleAuthProvider googleProvider;
 
   @override
   void initState() {
@@ -23,6 +26,13 @@ class _HomeScreenState extends State<HomeScreen> {
         this.user = user;
       });
     });
+
+    if (kIsWeb) {
+      googleProvider = GoogleAuthProvider();
+      googleProvider
+          .addScope('https://www.googleapis.com/auth/contacts.readonly');
+      googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
+    }
   }
 
   @override
@@ -51,10 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 )),
             user == null
                 ? TextButton.icon(
-                    onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginScreen())),
+                    onPressed: () {
+                      _scaffoldKey.currentState!.openDrawer();
+                    },
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.black.withAlpha(20),
                     ),
@@ -66,39 +75,35 @@ class _HomeScreenState extends State<HomeScreen> {
                       _scaffoldKey.currentState!.openDrawer();
                     },
                     padding: const EdgeInsets.all(4),
-                    icon: Container(
-                      width: 32,
-                      height: 32,
-                      padding: const EdgeInsets.all(1),
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withAlpha(40),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.black.withAlpha(40),
-                        backgroundImage: const NetworkImage(
-                            "https://lh3.googleusercontent.com/a/AAcHTtclbC8tqgAwbxh9LTCRTjVOFr0rw7xDjEisPO0Z-33uLdY=s288-c-no"),
-                      ),
-                    ),
+                    icon: user?.photoURL == null
+                        ? const Icon(
+                            Icons.account_circle_rounded,
+                            color: Colors.grey,
+                            size: 32,
+                          )
+                        : Container(
+                            width: 32,
+                            height: 32,
+                            padding: const EdgeInsets.all(1),
+                            clipBehavior: Clip.hardEdge,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(40),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.black.withAlpha(40),
+                              backgroundImage: NetworkImage(user!.photoURL!),
+                            ),
+                          ),
                   )
           ]),
         ),
       ),
-      body: Column(
+      body: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(child: Text(user?.uid ?? "uid")),
-          Center(
-              child: Text(
-            user?.emailVerified.toString() ?? "emailVerified",
-          )),
-          Center(child: Text(user?.isAnonymous.toString() ?? "isAnonymous")),
-          Center(child: Text(user?.displayName ?? "displayName")),
-          Center(child: Text(user?.email ?? "email")),
-          Center(child: Text(user?.phoneNumber ?? "phoneNumber")),
-          Center(child: Text(user?.photoURL ?? "photoURL")),
+          Center(child: Text("No memos")),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -113,25 +118,62 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       drawer: Drawer(
         child: ListView(children: [
-          const SizedBox(height: 80),
+          SizedBox(
+            height: 60,
+            child: user == null
+                ? null
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          FirebaseAuth.instance.signOut();
+                        },
+                        icon: const Icon(Icons.logout_rounded),
+                        label: const Text("Logout"),
+                      ),
+                    ],
+                  ),
+          ),
           Center(
-            child: SizedBox(
-              width: 80,
-              height: 80,
-              child: Image.asset("assets/Icon-512.png"),
-            ),
+            child: user?.photoURL == null
+                ? const Icon(
+                    Icons.account_circle_rounded,
+                    color: Colors.grey,
+                    size: 120,
+                  )
+                : Container(
+                    width: 120,
+                    height: 120,
+                    padding: const EdgeInsets.all(2),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(20),
+                      borderRadius: BorderRadius.circular(60),
+                    ),
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(user!.photoURL!),
+                    ),
+                  ),
           ),
           const SizedBox(height: 10),
           Center(
-            child: Text(
-              "WomoMemo",
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800),
-            ),
+            child: user == null
+                ? SignInButton(
+                    Buttons.Google,
+                    onPressed: handleSignIn,
+                  )
+                : Text(
+                    "양경호",
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800),
+                  ),
           ),
-          const SizedBox(height: 80),
+          Center(child: Text(user?.email ?? "")),
+          const SizedBox(height: 60),
           ListTile(
             leading: const Icon(Icons.sticky_note_2_rounded),
             title: const Text("Memos"),
@@ -145,5 +187,39 @@ class _HomeScreenState extends State<HomeScreen> {
         ]),
       ),
     );
+  }
+
+  handleSignIn() async {
+    var credential = await signInWithGoogle();
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    if (kIsWeb) {
+      // Create a new provider
+      GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+      googleProvider
+          .addScope('https://www.googleapis.com/auth/contacts.readonly');
+      googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
+
+      // Once signed in, return the UserCredential
+      return await FirebaseAuth.instance.signInWithPopup(googleProvider);
+    } else {
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      // Once signed in, return the UserCredential
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    }
   }
 }
