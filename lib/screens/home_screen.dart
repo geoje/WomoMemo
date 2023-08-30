@@ -16,7 +16,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   User? user;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late GoogleAuthProvider googleProvider;
 
   @override
   void initState() {
@@ -26,13 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
         this.user = user;
       });
     });
-
-    if (kIsWeb) {
-      googleProvider = GoogleAuthProvider();
-      googleProvider
-          .addScope('https://www.googleapis.com/auth/contacts.readonly');
-      googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
-    }
   }
 
   @override
@@ -190,20 +182,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   handleSignIn() async {
-    var credential = await signInWithGoogle();
+    await signInWithGoogle();
   }
 
   Future<UserCredential> signInWithGoogle() async {
     if (kIsWeb) {
-      // Create a new provider
-      GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
-      googleProvider
-          .addScope('https://www.googleapis.com/auth/contacts.readonly');
-      googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
-
       // Once signed in, return the UserCredential
-      return await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      return await FirebaseAuth.instance.signInWithPopup(GoogleAuthProvider());
     } else {
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
