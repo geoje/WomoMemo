@@ -1,6 +1,6 @@
 {
-  "name": "womomemo",
-  "short_name": "womomemo",
+  "name": "WomoMemo",
+  "short_name": "WomoMemo",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#FFFFF0",
