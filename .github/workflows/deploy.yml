@@ -22,7 +22,7 @@ jobs:
         run: flutter pub get
 
       - name: 🛠️ Build
-        run: flutter build web
+        run: flutter build web --release --no-tree-shake-icons
 
       - name: 🚚 Deploy to firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
