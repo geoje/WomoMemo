@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -182,7 +184,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   handleSignIn() async {
-    await signInWithGoogle();
+    if (kIsWeb) {
+      await signInWithGoogle();
+    } else if (!Platform.isWindows && !Platform.isLinux) {
+      await signInWithGoogle();
+    } else {
+      _scaffoldKey.currentState!.closeDrawer();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                Icons.warning_rounded,
+                color: Colors.yellow,
+              ),
+              SizedBox(
+                width: 8,
+              ),
+              Text('Firebase does not support on Windows yet...'),
+            ],
+          ),
+        ),
+      );
+    }
   }
 
   Future<UserCredential> signInWithGoogle() async {

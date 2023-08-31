@@ -48,7 +48,7 @@ class DefaultFirebaseOptions {
     appId: '1:296416469462:web:cef551e8a15749f46c4477',
     messagingSenderId: '296416469462',
     projectId: 'womoso',
-    authDomain: 'womoso.firebaseapp.com',
+    authDomain: 'www.womosoft.com',
     storageBucket: 'womoso.appspot.com',
     measurementId: 'G-2PMT7NJ7WX',
   );
@@ -67,7 +67,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '296416469462',
     projectId: 'womoso',
     storageBucket: 'womoso.appspot.com',
-    iosClientId: '296416469462-2bgdlhhgqionh12dauc82eqqf8pvsce9.apps.googleusercontent.com',
+    iosClientId:
+        '296416469462-2bgdlhhgqionh12dauc82eqqf8pvsce9.apps.googleusercontent.com',
     iosBundleId: 'com.womosoft.memo',
   );
 
@@ -77,7 +78,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '296416469462',
     projectId: 'womoso',
     storageBucket: 'womoso.appspot.com',
-    iosClientId: '296416469462-hm9j4q7c1e52qh989aa518g5em2ojuge.apps.googleusercontent.com',
+    iosClientId:
+        '296416469462-hm9j4q7c1e52qh989aa518g5em2ojuge.apps.googleusercontent.com',
     iosBundleId: 'com.womosoft.memo.RunnerTests',
   );
 }
