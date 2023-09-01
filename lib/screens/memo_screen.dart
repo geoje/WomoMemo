@@ -29,22 +29,34 @@ class _MemoScreenState extends State<MemoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: TextFormField(
-          controller: titleController,
-          decoration: const InputDecoration(
-            hintText: "Title",
-            border: InputBorder.none,
+        title: Hero(
+          tag: "title-${widget.memoKey}",
+          child: Material(
+            type: MaterialType.transparency,
+            child: TextFormField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                hintText: "Title",
+                border: InputBorder.none,
+              ),
+            ),
           ),
         ),
       ),
       body: SingleChildScrollView(
-        child: TextFormField(
-          controller: contentController,
-          maxLines: 9999,
-          decoration: const InputDecoration(
-            contentPadding: EdgeInsets.all(16),
-            hintText: "Content",
-            border: InputBorder.none,
+        child: Hero(
+          tag: "content-${widget.memoKey}",
+          child: Material(
+            type: MaterialType.transparency,
+            child: TextFormField(
+              controller: contentController,
+              maxLines: null,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(16),
+                hintText: "Content",
+                border: InputBorder.none,
+              ),
+            ),
           ),
         ),
       ),

@@ -9,6 +9,10 @@ import 'package:womomemo/screens/memo_screen.dart';
 import 'package:womomemo/services/auth.dart';
 import 'package:womomemo/services/rtdb.dart';
 
+enum ViewMode { memos, archive }
+
+const maxPreviewLines = 10;
+
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
 
@@ -20,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, Memo> memos = {};
+  var viewMode = ViewMode.memos;
 
   @override
   void initState() {
@@ -123,8 +128,23 @@ class _HomeScreenState extends State<HomeScreen> {
           for (var memo in memos.entries)
             ListTile(
               onTap: () => handleEdit(memo.key),
-              title: Text(memo.value.title),
-              subtitle: Text(memo.value.content),
+              title: Hero(
+                tag: "title-${memo.key}",
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Text(memo.value.title),
+                ),
+              ),
+              subtitle: Hero(
+                tag: "content-${memo.key}",
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 160),
+                    child: Text(memo.value.content),
+                  ),
+                ),
+              ),
             )
         ],
       ),
@@ -197,12 +217,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: const Icon(Icons.sticky_note_2_rounded),
             title: const Text("Memos"),
-            onTap: () {},
+            onTap: () {
+              setState(() => viewMode = ViewMode.memos);
+              widget.scaffoldKey.currentState!.closeDrawer();
+            },
           ),
           ListTile(
             leading: const Icon(Icons.archive_rounded),
             title: const Text("Archive"),
-            onTap: () {},
+            onTap: () {
+              setState(() => viewMode = ViewMode.archive);
+              widget.scaffoldKey.currentState!.closeDrawer();
+            },
           ),
         ]),
       ),
