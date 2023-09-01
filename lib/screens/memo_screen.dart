@@ -16,6 +16,8 @@ class MemoScreen extends StatefulWidget {
 class _MemoScreenState extends State<MemoScreen> {
   late final TextEditingController titleController, contentController;
   bool removing = false;
+  bool archive = false;
+  bool checkbox = false;
 
   @override
   void initState() {
@@ -23,6 +25,8 @@ class _MemoScreenState extends State<MemoScreen> {
 
     titleController = TextEditingController(text: widget.memo?.title);
     contentController = TextEditingController(text: widget.memo?.content);
+    archive = widget.memo?.archive ?? false;
+    checkbox = widget.memo?.checkbox ?? false;
   }
 
   @override
@@ -70,7 +74,15 @@ class _MemoScreenState extends State<MemoScreen> {
                 onPressed: handleAddingCheck,
                 icon: const Icon(Icons.add_box_rounded),
               ),
+              IconButton(
+                onPressed: handleColor,
+                icon: const Icon(Icons.palette_rounded),
+              ),
               const Expanded(child: SizedBox()),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.archive_rounded),
+              ),
               IconButton(
                 onPressed: handleDelete,
                 icon: const Icon(Icons.delete_forever_rounded),
@@ -94,8 +106,9 @@ class _MemoScreenState extends State<MemoScreen> {
   }
 
   void handleAddingCheck() {}
+  void handleColor() {}
   void handleDelete() {
-    RTDB.instance.ref("memos/Test/${widget.memoKey}").remove();
+    RTDB.instance.ref("memos/${Auth.user!.uid}/${widget.memoKey}").remove();
     removing = true;
     Navigator.pop(context);
   }

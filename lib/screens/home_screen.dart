@@ -8,6 +8,7 @@ import 'package:womomemo/models/memo.dart';
 import 'package:womomemo/screens/memo_screen.dart';
 import 'package:womomemo/services/auth.dart';
 import 'package:womomemo/services/rtdb.dart';
+import 'package:womomemo/widgets/memo_widget.dart';
 
 enum ViewMode { memos, archive }
 
@@ -125,27 +126,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: ListView(
         children: [
-          for (var memo in memos.entries)
-            ListTile(
-              onTap: () => handleEdit(memo.key),
-              title: Hero(
-                tag: "title-${memo.key}",
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: Text(memo.value.title),
-                ),
-              ),
-              subtitle: Hero(
-                tag: "content-${memo.key}",
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 160),
-                    child: Text(memo.value.content),
-                  ),
-                ),
-              ),
-            )
+          for (var entry in memos.entries)
+            MemoWidget(memoKey: entry.key, memo: entry.value)
         ],
       ),
       floatingActionButton: FloatingActionButton(
