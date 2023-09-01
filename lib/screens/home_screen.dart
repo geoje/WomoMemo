@@ -4,27 +4,51 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:womomemo/models/memo.dart';
+import 'package:womomemo/screens/memo_screen.dart';
+import 'package:womomemo/services/auth.dart';
+import 'package:womomemo/services/rtdb.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.title});
+  HomeScreen({super.key});
 
-  final String title;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  User? user;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  Map<String, Memo> memos = {};
 
   @override
   void initState() {
     super.initState();
+
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       setState(() {
-        this.user = user;
+        Auth.user = user;
+
+        if (user != null) {
+          // Get all memos
+          var memosRef = RTDB.instance.ref("memos/${user.uid}");
+
+          // Set listener
+          memosRef.onValue.listen((event) {
+            for (final child in event.snapshot.children) {
+              final String title = child.child("title").value.toString();
+              final String content = child.child("content").value.toString();
+              memos[child.key!] = Memo(title: title, content: content);
+            }
+            setState(() {});
+          });
+
+          // Delete listener
+          memosRef.onChildRemoved.listen((event) {
+            memos.remove(event.snapshot.key);
+            setState(() {});
+          });
+        }
       });
     });
   }
@@ -32,18 +56,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
+      key: widget.scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Container(
           decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: Colors.black.withAlpha(20),
               borderRadius: BorderRadius.circular(64)),
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(children: [
             IconButton(
               onPressed: () {
-                _scaffoldKey.currentState!.openDrawer();
+                widget.scaffoldKey.currentState!.openDrawer();
               },
               icon: const Icon(Icons.menu_rounded),
             ),
@@ -53,10 +77,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: InputDecoration(
                       hintText: "Search your memos", border: InputBorder.none),
                 )),
-            user == null
+            Auth.user == null
                 ? TextButton.icon(
                     onPressed: () {
-                      _scaffoldKey.currentState!.openDrawer();
+                      widget.scaffoldKey.currentState!.openDrawer();
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.black.withAlpha(20),
@@ -66,10 +90,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
                 : IconButton(
                     onPressed: () {
-                      _scaffoldKey.currentState!.openDrawer();
+                      widget.scaffoldKey.currentState!.openDrawer();
                     },
                     padding: const EdgeInsets.all(4),
-                    icon: user?.photoURL == null
+                    icon: Auth.user?.photoURL == null
                         ? const Icon(
                             Icons.account_circle_rounded,
                             color: Colors.grey,
@@ -86,22 +110,26 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: CircleAvatar(
                               backgroundColor: Colors.black.withAlpha(40),
-                              backgroundImage: NetworkImage(user!.photoURL!),
+                              backgroundImage:
+                                  NetworkImage(Auth.user!.photoURL!),
                             ),
                           ),
                   )
           ]),
         ),
       ),
-      body: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: ListView(
         children: [
-          Center(child: Text("No memos")),
+          for (var memo in memos.entries)
+            ListTile(
+              onTap: () => handleEdit(memo.key),
+              title: Text(memo.value.title),
+              subtitle: Text(memo.value.content),
+            )
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: handleNew,
         elevation: 0,
         focusElevation: 0,
         hoverElevation: 0,
@@ -114,16 +142,14 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(children: [
           SizedBox(
             height: 60,
-            child: user == null
+            child: Auth.user == null
                 ? null
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TextButton.icon(
-                        onPressed: () {
-                          FirebaseAuth.instance.signOut();
-                        },
+                        onPressed: handleLogout,
                         icon: const Icon(Icons.logout_rounded),
                         label: const Text("Logout"),
                       ),
@@ -131,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
           ),
           Center(
-            child: user?.photoURL == null
+            child: Auth.user?.photoURL == null
                 ? const Icon(
                     Icons.account_circle_rounded,
                     color: Colors.grey,
@@ -147,16 +173,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(60),
                     ),
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage(user!.photoURL!),
+                      backgroundImage: NetworkImage(Auth.user!.photoURL!),
                     ),
                   ),
           ),
           const SizedBox(height: 10),
           Center(
-            child: user == null
+            child: Auth.user == null
                 ? SignInButton(
                     Buttons.Google,
-                    onPressed: handleSignIn,
+                    onPressed: handleLogin,
                   )
                 : Text(
                     "양경호",
@@ -166,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.grey.shade800),
                   ),
           ),
-          Center(child: Text(user?.email ?? "")),
+          Center(child: Text(Auth.user?.email ?? "")),
           const SizedBox(height: 60),
           ListTile(
             leading: const Icon(Icons.sticky_note_2_rounded),
@@ -183,13 +209,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  handleSignIn() async {
+  handleLogin() async {
     if (kIsWeb) {
-      await signInWithGoogle();
+      await Auth.signInWithGoogle();
     } else if (!Platform.isWindows && !Platform.isLinux) {
-      await signInWithGoogle();
+      await Auth.signInWithGoogle();
     } else {
-      _scaffoldKey.currentState!.closeDrawer();
+      widget.scaffoldKey.currentState!.closeDrawer();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Row(
@@ -209,26 +235,34 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<UserCredential> signInWithGoogle() async {
-    if (kIsWeb) {
-      // Once signed in, return the UserCredential
-      return await FirebaseAuth.instance.signInWithPopup(GoogleAuthProvider());
-    } else {
-      // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  void handleLogout() {
+    memos = {};
+    FirebaseAuth.instance.signOut();
+  }
 
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
+  handleNew() async {
+    if (Auth.user == null) return;
 
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
+    var key = RTDB.instance.ref("memos/${Auth.user!.uid}").push().key;
+    if (key == null) return;
 
-      // Once signed in, return the UserCredential
-      return await FirebaseAuth.instance.signInWithCredential(credential);
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MemoScreen(memoKey: key),
+      ),
+    );
+  }
+
+  void handleEdit(String key) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MemoScreen(
+          memoKey: key,
+          memo: memos[key],
+        ),
+      ),
+    );
   }
 }
