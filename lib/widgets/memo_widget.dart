@@ -26,21 +26,30 @@ class MemoWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            memo.title.isEmpty ? const SizedBox.shrink() : Text(memo.title),
             memo.title.isEmpty
+                ? const SizedBox.shrink()
+                : Text(
+                    memo.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+            memo.title.isEmpty || memo.content.isEmpty
                 ? const SizedBox.shrink()
                 : Divider(
                     color: ColorMap.border(memo.color),
                   ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 160),
-              child: Text(
-                memo.content,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
+            memo.content.isEmpty
+                ? const SizedBox.shrink()
+                : ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 160),
+                    child: Text(
+                      memo.content,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
           ],
         ),
       ),

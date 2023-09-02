@@ -85,22 +85,38 @@ class _MemoScreenState extends State<MemoScreen> {
           padding: const EdgeInsets.all(8),
           child: Row(
             children: [
-              IconButton(
-                onPressed: handleAddingCheck,
-                icon: const Icon(Icons.add_box_rounded),
+              Tooltip(
+                message: memo.checkbox ? "Disable Checkbox" : "Enable Checkbox",
+                child: IconButton(
+                  onPressed: handleAddingCheck,
+                  icon: Icon(memo.checkbox
+                      ? Icons.indeterminate_check_box
+                      : Icons.checklist),
+                ),
               ),
-              IconButton(
-                onPressed: handleColor,
-                icon: const Icon(Icons.palette_rounded),
+              Tooltip(
+                message: "Set Color",
+                child: IconButton(
+                  onPressed: handleColor,
+                  icon: const Icon(Icons.palette),
+                ),
               ),
               const Expanded(child: SizedBox()),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.archive_rounded),
+              Tooltip(
+                message: memo.archive ? "Unarchive" : "Archive",
+                child: IconButton(
+                  onPressed: handleArchive,
+                  icon: Icon(
+                    memo.archive ? Icons.unarchive_outlined : Icons.archive,
+                  ),
+                ),
               ),
-              IconButton(
-                onPressed: handleDelete,
-                icon: const Icon(Icons.delete_forever_rounded),
+              Tooltip(
+                message: "Delete",
+                child: IconButton(
+                  onPressed: handleDelete,
+                  icon: const Icon(Icons.delete),
+                ),
               ),
             ],
           ),
@@ -119,7 +135,10 @@ class _MemoScreenState extends State<MemoScreen> {
     return false;
   }
 
-  void handleAddingCheck() {}
+  void handleAddingCheck() {
+    setState(() => memo.checkbox = !memo.checkbox);
+  }
+
   void handleColor() {
     if (paletteTimer != null) {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -166,6 +185,10 @@ class _MemoScreenState extends State<MemoScreen> {
         ),
       );
     }
+  }
+
+  void handleArchive() {
+    setState(() => memo.archive = !memo.archive);
   }
 
   void handleDelete() {

@@ -28,7 +28,6 @@ class MyApp extends StatelessWidget {
       title: 'WomoMemo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.yellow),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         useMaterial3: true,
       ),
       home: HomeScreen(),

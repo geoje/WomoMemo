@@ -5,13 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:womomemo/models/memo.dart';
+import 'package:womomemo/models/navItem.dart';
 import 'package:womomemo/screens/memo_screen.dart';
 import 'package:womomemo/services/auth.dart';
 import 'package:womomemo/services/rtdb.dart';
 import 'package:womomemo/widgets/memo_widget.dart';
-
-enum ViewMode { memos, archive }
 
 const maxPreviewLines = 10;
 
@@ -19,6 +19,23 @@ class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final List<NavItem> navItems = [
+    NavItem(
+      label: "Memos",
+      iconData: Icons.sticky_note_2_outlined,
+      iconDataActive: Icons.sticky_note_2,
+    ),
+    NavItem(
+      label: "Archive",
+      iconData: Icons.archive_outlined,
+      iconDataActive: Icons.archive,
+    ),
+    NavItem(
+      label: "Trash",
+      iconData: Icons.delete_outline,
+      iconDataActive: Icons.delete,
+    )
+  ];
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,7 +43,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, Memo> memos = {};
-  var viewMode = ViewMode.memos;
+  String viewMode = "Memos";
+  bool viewWomosoft = false;
 
   @override
   void initState() {
@@ -65,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
         title: Container(
           decoration: BoxDecoration(
               color: Colors.black.withAlpha(20),
@@ -75,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 widget.scaffoldKey.currentState!.openDrawer();
               },
-              icon: const Icon(Icons.menu_rounded),
+              icon: const Icon(Icons.menu),
             ),
             const Expanded(
                 flex: 1,
@@ -91,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.black.withAlpha(20),
                     ),
-                    icon: const Icon(Icons.login_rounded),
+                    icon: const Icon(Icons.login),
                     label: const Text("Login"),
                   )
                 : IconButton(
@@ -101,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.all(4),
                     icon: Auth.user?.photoURL == null
                         ? const Icon(
-                            Icons.account_circle_rounded,
+                            Icons.account_circle,
                             color: Colors.grey,
                             size: 32,
                           )
@@ -124,17 +143,31 @@ class _HomeScreenState extends State<HomeScreen> {
           ]),
         ),
       ),
-      body: MasonryGridView.count(
-        itemCount: memos.length,
-        crossAxisCount: (MediaQuery.of(context).size.width / 200).floor(),
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        padding: const EdgeInsets.all(8),
-        itemBuilder: (context, index) {
-          var entry = memos.entries.toList()[index];
-          return MemoWidget(memoKey: entry.key, memo: entry.value);
-        },
-      ),
+      body: memos.values.where((memo) => isVisible(viewMode, memo)).isEmpty
+          ? Center(
+              child: Icon(
+                widget.navItems
+                    .firstWhere((item) => item.label == viewMode)
+                    .iconData,
+                color: Colors.grey.shade200,
+                size: 192,
+              ),
+            )
+          : MasonryGridView.count(
+              itemCount: memos.values
+                  .where((memo) => isVisible(viewMode, memo))
+                  .length,
+              crossAxisCount: (MediaQuery.of(context).size.width / 200).floor(),
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              padding: const EdgeInsets.all(8),
+              itemBuilder: (context, index) {
+                var entry = memos.entries
+                    .where((entry) => isVisible(viewMode, entry.value))
+                    .toList()[index];
+                return MemoWidget(memoKey: entry.key, memo: entry.value);
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: handleNew,
         elevation: 0,
@@ -142,31 +175,50 @@ class _HomeScreenState extends State<HomeScreen> {
         hoverElevation: 0,
         highlightElevation: 0,
         disabledElevation: 0,
-        backgroundColor: Colors.grey.shade300,
-        child: const Icon(Icons.add_rounded),
+        backgroundColor: Colors.black.withAlpha(30),
+        child: const Icon(Icons.add),
       ),
       drawer: Drawer(
         child: ListView(children: [
           SizedBox(
             height: 60,
-            child: Auth.user == null
-                ? null
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextButton.icon(
-                        onPressed: handleLogout,
-                        icon: const Icon(Icons.logout_rounded),
-                        label: const Text("Logout"),
-                      ),
-                    ],
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: () => setState(() {
+                      viewWomosoft = !viewWomosoft;
+                    }),
+                    icon: SvgPicture.asset(
+                      "assets/womosoft.svg",
+                      width: 24,
+                      height: 24,
+                      colorFilter: viewWomosoft
+                          ? null
+                          : ColorFilter.mode(
+                              Theme.of(context).primaryColor,
+                              BlendMode.srcIn,
+                            ),
+                    ),
                   ),
+                  Auth.user == null
+                      ? const SizedBox()
+                      : TextButton.icon(
+                          onPressed: handleLogout,
+                          icon: const Icon(Icons.logout),
+                          label: const Text("Logout"),
+                        ),
+                ],
+              ),
+            ),
           ),
           Center(
             child: Auth.user?.photoURL == null
                 ? const Icon(
-                    Icons.account_circle_rounded,
+                    Icons.account_circle,
                     color: Colors.grey,
                     size: 120,
                   )
@@ -194,32 +246,47 @@ class _HomeScreenState extends State<HomeScreen> {
                 : Text(
                     Auth.user!.displayName ?? "",
                     style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
                   ),
           ),
           Center(child: Text(Auth.user?.email ?? "")),
           const SizedBox(height: 60),
-          ListTile(
-            leading: const Icon(Icons.sticky_note_2_rounded),
-            title: const Text("Memos"),
-            onTap: () {
-              setState(() => viewMode = ViewMode.memos);
-              widget.scaffoldKey.currentState!.closeDrawer();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.archive_rounded),
-            title: const Text("Archive"),
-            onTap: () {
-              setState(() => viewMode = ViewMode.archive);
-              widget.scaffoldKey.currentState!.closeDrawer();
-            },
-          ),
+          for (var navItem in widget.navItems)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextButton(
+                onPressed: () {
+                  setState(() => viewMode = navItem.label);
+                  widget.scaffoldKey.currentState!.closeDrawer();
+                },
+                style: viewMode == navItem.label
+                    ? TextButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).primaryColor.withAlpha(40))
+                    : null,
+                child: Row(children: [
+                  Icon(viewMode == navItem.label
+                      ? navItem.iconDataActive
+                      : navItem.iconData),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(navItem.label)),
+                ]),
+              ),
+            )
         ]),
       ),
     );
+  }
+
+  bool isVisible(String viewMode, Memo memo) {
+    return memo.delete != null
+        ? viewMode == "Trash"
+        : memo.archive
+            ? viewMode == "Archive"
+            : viewMode == "Memos";
   }
 
   handleLogin() async {
@@ -234,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
           content: Row(
             children: [
               Icon(
-                Icons.warning_rounded,
+                Icons.warning,
                 color: Colors.yellow,
               ),
               SizedBox(
@@ -248,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void handleLogout() {
+  handleLogout() {
     memos = {};
     FirebaseAuth.instance.signOut();
   }
@@ -267,7 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void handleEdit(String key) {
+  handleEdit(String key) {
     Navigator.push(
       context,
       MaterialPageRoute(

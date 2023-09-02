@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ColorMap {
-  static final defaultBackColor = Colors.yellow.shade100;
-  static final defaultBorderColor = Colors.yellow.shade300;
-
   static Map<String, MaterialColor> colors = {
     "pink": Colors.pink,
     "red": Colors.red,
@@ -28,12 +25,12 @@ class ColorMap {
   };
 
   static Color background(String color) {
-    return (color == "clear" ? Colors.white : colors[color]?[100]) ??
-        defaultBackColor;
+    return (color == "clear" ? Colors.white : colors[color]?[50]) ??
+        Colors.white;
   }
 
   static Color border(String color) {
-    return (color == "clear" ? Colors.black12 : colors[color]?[200]) ??
-        defaultBorderColor;
+    return (color == "clear" ? Colors.black12 : colors[color]?[100]) ??
+        Colors.black12;
   }
 }

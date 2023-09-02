@@ -14,10 +14,12 @@ class Memo {
         color = (snapshot.child("color").value ?? Memo().color).toString(),
         archive = (snapshot.child("archive").value ?? Memo().archive) as bool,
         checkbox =
-            (snapshot.child("checkbox").value ?? Memo().checkbox) as bool;
+            (snapshot.child("checkbox").value ?? Memo().checkbox) as bool,
+        delete = DateTime.parse(snapshot.child("delete").value.toString());
 
   String title, content, color;
   bool archive, checkbox;
+  DateTime? delete;
 
   Map<String, dynamic> toJson() {
     return ({
@@ -26,6 +28,7 @@ class Memo {
       "color": color,
       "archive": archive,
       "checkbox": checkbox,
+      "delete": delete?.toIso8601String(),
     });
   }
 }
