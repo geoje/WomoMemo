@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_masonry_view/flutter_masonry_view.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:womomemo/models/memo.dart';
 import 'package:womomemo/screens/memo_screen.dart';
@@ -42,9 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Set listener
           memosRef.onValue.listen((event) {
             for (final child in event.snapshot.children) {
-              final String title = child.child("title").value.toString();
-              final String content = child.child("content").value.toString();
-              memos[child.key!] = Memo(title: title, content: content);
+              memos[child.key!] = Memo.fromSnapshot(child);
             }
             setState(() {});
           });
@@ -63,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: widget.scaffoldKey,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Container(
@@ -124,11 +124,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ]),
         ),
       ),
-      body: ListView(
-        children: [
-          for (var entry in memos.entries)
-            MemoWidget(memoKey: entry.key, memo: entry.value)
-        ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: MasonryView(
+          listOfItem: memos.keys.toList(),
+          itemPadding: 8,
+          itemRadius: 0,
+          numberOfColumn: (MediaQuery.of(context).size.width / 300).floor(),
+          itemBuilder: (key) {
+            return MemoWidget(memoKey: key, memo: memos[key] ?? Memo());
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: handleNew,
@@ -187,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: handleLogin,
                   )
                 : Text(
-                    "양경호",
+                    Auth.user!.displayName ?? "",
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
