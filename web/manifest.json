@@ -3,8 +3,6 @@
   "short_name": "WomoMemo",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#FFFFF0",
-  "theme_color": "#FAF089",
   "description": "WomoMemo",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
