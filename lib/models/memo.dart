@@ -15,7 +15,7 @@ class Memo {
         archive = (snapshot.child("archive").value ?? Memo().archive) as bool,
         checkbox =
             (snapshot.child("checkbox").value ?? Memo().checkbox) as bool,
-        delete = DateTime.parse(snapshot.child("delete").value.toString());
+        delete = DateTime.tryParse(snapshot.child("delete").value.toString());
 
   String title, content, color;
   bool archive, checkbox;
