@@ -14,30 +14,36 @@ class MemoWidget extends StatelessWidget {
     return FilledButton(
       onPressed: () => handleEdit(context, memoKey),
       style: FilledButton.styleFrom(
+        foregroundColor: Colors.black,
         backgroundColor: ColorMap.background(memo.color),
+        padding: const EdgeInsets.all(0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         side: BorderSide(color: ColorMap.border(memo.color)),
         elevation: 0,
       ),
-      child: Column(children: [
-        Hero(
-          tag: "title-$memoKey",
-          child: Material(
-            type: MaterialType.transparency,
-            child: Text(memo.title),
-          ),
-        ),
-        Hero(
-          tag: "content-$memoKey",
-          child: Material(
-            type: MaterialType.transparency,
-            child: ConstrainedBox(
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            memo.title.isEmpty ? const SizedBox.shrink() : Text(memo.title),
+            memo.title.isEmpty
+                ? const SizedBox.shrink()
+                : Divider(
+                    color: ColorMap.border(memo.color),
+                  ),
+            ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 160),
-              child: Text(memo.content),
+              child: Text(
+                memo.content,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      ]),
+      ),
     );
   }
 

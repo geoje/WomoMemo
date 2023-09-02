@@ -24,47 +24,16 @@ class ColorMap {
     "blueGrey": Colors.blueGrey,
     "brown": Colors.brown,
     "grey": Colors.grey,
-    "black": const MaterialColor(
-      0xFF000000,
-      <int, Color>{
-        12: Colors.black12,
-        26: Colors.black26,
-        38: Colors.black38,
-        45: Colors.black45,
-        54: Colors.black54,
-        87: Colors.black87,
-      },
-    ),
-    "white": const MaterialColor(
-      0xFFFFFFFFF,
-      <int, Color>{
-        10: Colors.white10,
-        12: Colors.white12,
-        24: Colors.white24,
-        30: Colors.white30,
-        38: Colors.white38,
-        54: Colors.white54,
-        60: Colors.white60,
-        70: Colors.white70,
-      },
-    ),
+    "clear": const MaterialColor(0, {}),
   };
 
   static Color background(String color) {
-    return (color == "black"
-            ? Colors.black
-            : color == "white"
-                ? Colors.white
-                : colors[color]?[100]) ??
+    return (color == "clear" ? Colors.white : colors[color]?[100]) ??
         defaultBackColor;
   }
 
   static Color border(String color) {
-    return (color == "black"
-            ? Colors.white12
-            : color == "white"
-                ? Colors.black12
-                : colors[color]?[200]) ??
+    return (color == "clear" ? Colors.black12 : colors[color]?[200]) ??
         defaultBorderColor;
   }
 }

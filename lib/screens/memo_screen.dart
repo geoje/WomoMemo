@@ -59,41 +59,30 @@ class _MemoScreenState extends State<MemoScreen> {
       backgroundColor: ColorMap.background(memo.color),
       appBar: AppBar(
         backgroundColor: ColorMap.background(memo.color),
-        title: Hero(
-          tag: "title-${widget.memoKey}",
-          child: Material(
-            type: MaterialType.transparency,
-            child: TextFormField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                hintText: "Title",
-                border: InputBorder.none,
-              ),
-            ),
+        title: TextFormField(
+          controller: titleController,
+          decoration: const InputDecoration(
+            hintText: "Title",
+            border: InputBorder.none,
           ),
         ),
       ),
       body: SingleChildScrollView(
-        child: Hero(
-          tag: "content-${widget.memoKey}",
-          child: Material(
-            type: MaterialType.transparency,
-            child: TextFormField(
-              controller: contentController,
-              maxLines: null,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.all(16),
-                hintText: "Content",
-                border: InputBorder.none,
-              ),
-            ),
+        child: TextFormField(
+          controller: contentController,
+          maxLines: null,
+          decoration: const InputDecoration(
+            contentPadding: EdgeInsets.all(16),
+            hintText: "Content",
+            border: InputBorder.none,
           ),
+          style: const TextStyle(fontWeight: FontWeight.w400),
         ),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: Colors.black.withAlpha(20)),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Row(
             children: [
               IconButton(

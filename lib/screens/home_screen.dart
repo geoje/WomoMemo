@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_masonry_view/flutter_masonry_view.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:womomemo/models/memo.dart';
 import 'package:womomemo/screens/memo_screen.dart';
 import 'package:womomemo/services/auth.dart';
@@ -124,17 +124,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ]),
         ),
       ),
-      body: SingleChildScrollView(
+      body: MasonryGridView.count(
+        itemCount: memos.length,
+        crossAxisCount: (MediaQuery.of(context).size.width / 200).floor(),
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
         padding: const EdgeInsets.all(8),
-        child: MasonryView(
-          listOfItem: memos.keys.toList(),
-          itemPadding: 8,
-          itemRadius: 0,
-          numberOfColumn: (MediaQuery.of(context).size.width / 300).floor(),
-          itemBuilder: (key) {
-            return MemoWidget(memoKey: key, memo: memos[key] ?? Memo());
-          },
-        ),
+        itemBuilder: (context, index) {
+          var entry = memos.entries.toList()[index];
+          return MemoWidget(memoKey: entry.key, memo: entry.value);
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: handleNew,
