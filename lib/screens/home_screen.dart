@@ -1,16 +1,12 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:womomemo/models/memo.dart';
 import 'package:womomemo/models/navItem.dart';
 import 'package:womomemo/screens/memo_screen.dart';
 import 'package:womomemo/services/auth.dart';
 import 'package:womomemo/services/rtdb.dart';
+import 'package:womomemo/widgets/drawer_widget.dart';
 import 'package:womomemo/widgets/memo_widget.dart';
 import 'package:womomemo/widgets/search_widget.dart';
 
@@ -20,23 +16,6 @@ class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  final List<NavItem> navItems = [
-    NavItem(
-      label: "Memos",
-      iconData: Icons.sticky_note_2_outlined,
-      iconDataActive: Icons.sticky_note_2,
-    ),
-    NavItem(
-      label: "Archive",
-      iconData: Icons.archive_outlined,
-      iconDataActive: Icons.archive,
-    ),
-    NavItem(
-      label: "Trash",
-      iconData: Icons.delete_outline,
-      iconDataActive: Icons.delete,
-    )
-  ];
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -45,7 +24,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, Memo> memos = {};
   String viewMode = "Memos";
-  bool viewWomosoft = false;
 
   @override
   void initState() {
@@ -102,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: memos.values.where((memo) => isVisible(viewMode, memo)).isEmpty
           ? Center(
               child: Icon(
-                widget.navItems
+                NavItem.items
                     .firstWhere((item) => item.label == viewMode)
                     .iconData,
                 color: Colors.grey.shade200,
@@ -137,107 +115,13 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           : null,
       drawer: Drawer(
-        child: ListView(
-          children: [
-            SizedBox(
-              height: 60,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    IconButton(
-                      onPressed: () => setState(() {
-                        viewWomosoft = !viewWomosoft;
-                      }),
-                      icon: SvgPicture.asset(
-                        "assets/womosoft.svg",
-                        width: 24,
-                        height: 24,
-                        colorFilter: viewWomosoft
-                            ? null
-                            : ColorFilter.mode(
-                                Theme.of(context).primaryColor,
-                                BlendMode.srcIn,
-                              ),
-                      ),
-                    ),
-                    Auth.user == null
-                        ? const SizedBox()
-                        : TextButton.icon(
-                            onPressed: handleLogout,
-                            icon: const Icon(Icons.logout),
-                            label: const Text("Logout"),
-                          ),
-                  ],
-                ),
-              ),
-            ),
-            Center(
-              child: Auth.user?.photoURL == null
-                  ? const Icon(
-                      Icons.account_circle,
-                      color: Colors.grey,
-                      size: 120,
-                    )
-                  : Container(
-                      width: 120,
-                      height: 120,
-                      padding: const EdgeInsets.all(2),
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withAlpha(20),
-                        borderRadius: BorderRadius.circular(60),
-                      ),
-                      child: CircleAvatar(
-                        backgroundImage: NetworkImage(Auth.user!.photoURL!),
-                      ),
-                    ),
-            ),
-            const SizedBox(height: 10),
-            Center(
-              child: Auth.user == null
-                  ? SignInButton(
-                      Buttons.Google,
-                      onPressed: handleLogin,
-                    )
-                  : Text(
-                      Auth.user!.displayName ?? "",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-            ),
-            Center(child: Text(Auth.user?.email ?? "")),
-            const SizedBox(height: 60),
-            for (var navItem in widget.navItems)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: TextButton(
-                  onPressed: () {
-                    setState(() => viewMode = navItem.label);
-                    widget.scaffoldKey.currentState!.closeDrawer();
-                  },
-                  style: TextButton.styleFrom(
-                    fixedSize: const Size.fromHeight(48),
-                    backgroundColor: viewMode == navItem.label
-                        ? Theme.of(context).primaryColor.withAlpha(40)
-                        : null,
-                  ),
-                  child: Row(children: [
-                    Icon(viewMode == navItem.label
-                        ? navItem.iconDataActive
-                        : navItem.iconData),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(navItem.label)),
-                  ]),
-                ),
-              )
-          ],
-        ),
+        child: DrawerWidget(
+            onDrawerClosed: () =>
+                widget.scaffoldKey.currentState!.closeDrawer(),
+            onLogout: () => handleLogout,
+            viewMode: viewMode,
+            onViewModeChanged: (newViewMode) =>
+                setState(() => viewMode = newViewMode)),
       ),
       bottomNavigationBar: viewMode == "Trash"
           ? Container(
@@ -260,32 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
         : memo.archive
             ? viewMode == "Archive"
             : viewMode == "Memos";
-  }
-
-  handleLogin() async {
-    if (kIsWeb) {
-      await Auth.signInWithGoogle();
-    } else if (!Platform.isWindows && !Platform.isLinux) {
-      await Auth.signInWithGoogle();
-    } else {
-      widget.scaffoldKey.currentState!.closeDrawer();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              Icon(
-                Icons.warning,
-                color: Colors.yellow,
-              ),
-              SizedBox(
-                width: 8,
-              ),
-              Text('Firebase does not support on Windows yet...'),
-            ],
-          ),
-        ),
-      );
-    }
   }
 
   handleLogout() {
