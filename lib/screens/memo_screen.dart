@@ -38,8 +38,7 @@ class _MemoScreenState extends State<MemoScreen> {
   @override
   void dispose() async {
     ServicesBinding.instance.keyboard.removeHandler(_onKey);
-    // Not work
-    // ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
     paletteTimer?.cancel();
     super.dispose();
@@ -170,7 +169,9 @@ class _MemoScreenState extends State<MemoScreen> {
                           child: null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorMap.background(colorKey),
-                            side: BorderSide(color: ColorMap.border(colorKey)),
+                            side: BorderSide(
+                                color: ColorMap.border(colorKey),
+                                width: memo.color == colorKey ? 2 : 1),
                           ),
                           onPressed: () {
                             setState(() => memo.color = colorKey);

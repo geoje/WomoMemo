@@ -179,104 +179,107 @@ class _HomeScreenState extends State<HomeScreen> {
         child: const Icon(Icons.add),
       ),
       drawer: Drawer(
-        child: ListView(children: [
-          SizedBox(
-            height: 60,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  IconButton(
-                    onPressed: () => setState(() {
-                      viewWomosoft = !viewWomosoft;
-                    }),
-                    icon: SvgPicture.asset(
-                      "assets/womosoft.svg",
-                      width: 24,
-                      height: 24,
-                      colorFilter: viewWomosoft
-                          ? null
-                          : ColorFilter.mode(
-                              Theme.of(context).primaryColor,
-                              BlendMode.srcIn,
-                            ),
+        child: ListView(
+          children: [
+            SizedBox(
+              height: 60,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      onPressed: () => setState(() {
+                        viewWomosoft = !viewWomosoft;
+                      }),
+                      icon: SvgPicture.asset(
+                        "assets/womosoft.svg",
+                        width: 24,
+                        height: 24,
+                        colorFilter: viewWomosoft
+                            ? null
+                            : ColorFilter.mode(
+                                Theme.of(context).primaryColor,
+                                BlendMode.srcIn,
+                              ),
+                      ),
                     ),
-                  ),
-                  Auth.user == null
-                      ? const SizedBox()
-                      : TextButton.icon(
-                          onPressed: handleLogout,
-                          icon: const Icon(Icons.logout),
-                          label: const Text("Logout"),
-                        ),
-                ],
+                    Auth.user == null
+                        ? const SizedBox()
+                        : TextButton.icon(
+                            onPressed: handleLogout,
+                            icon: const Icon(Icons.logout),
+                            label: const Text("Logout"),
+                          ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Center(
-            child: Auth.user?.photoURL == null
-                ? const Icon(
-                    Icons.account_circle,
-                    color: Colors.grey,
-                    size: 120,
-                  )
-                : Container(
-                    width: 120,
-                    height: 120,
-                    padding: const EdgeInsets.all(2),
-                    clipBehavior: Clip.hardEdge,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withAlpha(20),
-                      borderRadius: BorderRadius.circular(60),
+            Center(
+              child: Auth.user?.photoURL == null
+                  ? const Icon(
+                      Icons.account_circle,
+                      color: Colors.grey,
+                      size: 120,
+                    )
+                  : Container(
+                      width: 120,
+                      height: 120,
+                      padding: const EdgeInsets.all(2),
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withAlpha(20),
+                        borderRadius: BorderRadius.circular(60),
+                      ),
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(Auth.user!.photoURL!),
+                      ),
                     ),
-                    child: CircleAvatar(
-                      backgroundImage: NetworkImage(Auth.user!.photoURL!),
+            ),
+            const SizedBox(height: 10),
+            Center(
+              child: Auth.user == null
+                  ? SignInButton(
+                      Buttons.Google,
+                      onPressed: handleLogin,
+                    )
+                  : Text(
+                      Auth.user!.displayName ?? "",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800,
+                      ),
                     ),
+            ),
+            Center(child: Text(Auth.user?.email ?? "")),
+            const SizedBox(height: 60),
+            for (var navItem in widget.navItems)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: TextButton(
+                  onPressed: () {
+                    setState(() => viewMode = navItem.label);
+                    widget.scaffoldKey.currentState!.closeDrawer();
+                  },
+                  style: TextButton.styleFrom(
+                    fixedSize: const Size.fromHeight(48),
+                    backgroundColor: viewMode == navItem.label
+                        ? Theme.of(context).primaryColor.withAlpha(40)
+                        : null,
                   ),
-          ),
-          const SizedBox(height: 10),
-          Center(
-            child: Auth.user == null
-                ? SignInButton(
-                    Buttons.Google,
-                    onPressed: handleLogin,
-                  )
-                : Text(
-                    Auth.user!.displayName ?? "",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-          ),
-          Center(child: Text(Auth.user?.email ?? "")),
-          const SizedBox(height: 60),
-          for (var navItem in widget.navItems)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextButton(
-                onPressed: () {
-                  setState(() => viewMode = navItem.label);
-                  widget.scaffoldKey.currentState!.closeDrawer();
-                },
-                style: viewMode == navItem.label
-                    ? TextButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).primaryColor.withAlpha(40))
-                    : null,
-                child: Row(children: [
-                  Icon(viewMode == navItem.label
-                      ? navItem.iconDataActive
-                      : navItem.iconData),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(navItem.label)),
-                ]),
-              ),
-            )
-        ]),
+                  child: Row(children: [
+                    Icon(viewMode == navItem.label
+                        ? navItem.iconDataActive
+                        : navItem.iconData),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(navItem.label)),
+                  ]),
+                ),
+              )
+          ],
+        ),
       ),
     );
   }
