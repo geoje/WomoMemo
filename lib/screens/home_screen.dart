@@ -12,6 +12,7 @@ import 'package:womomemo/screens/memo_screen.dart';
 import 'package:womomemo/services/auth.dart';
 import 'package:womomemo/services/rtdb.dart';
 import 'package:womomemo/widgets/memo_widget.dart';
+import 'package:womomemo/widgets/search_widget.dart';
 
 const maxPreviewLines = 10;
 
@@ -60,8 +61,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Set listener
           memosRef.onValue.listen((event) {
+            memos.clear();
             for (final child in event.snapshot.children) {
-              memos[child.key!] = Memo.fromSnapshot(child);
+              Memo memo = Memo.fromSnapshot(child);
+              if (memo.delete != null) {
+                if (DateTime.now().difference(memo.delete!).inDays > 30) {
+                  RTDB.instance
+                      .ref("memos/${Auth.user!.uid}/${child.key!}")
+                      .remove();
+                  continue;
+                }
+              }
+              memos[child.key!] = memo;
             }
             setState(() {});
           });
@@ -84,63 +95,8 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
-        title: Container(
-          decoration: BoxDecoration(
-              color: Colors.black.withAlpha(20),
-              borderRadius: BorderRadius.circular(64)),
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(children: [
-            IconButton(
-              onPressed: () {
-                widget.scaffoldKey.currentState!.openDrawer();
-              },
-              icon: const Icon(Icons.menu),
-            ),
-            const Expanded(
-                flex: 1,
-                child: TextField(
-                  decoration: InputDecoration(
-                      hintText: "Search your memos", border: InputBorder.none),
-                )),
-            Auth.user == null
-                ? TextButton.icon(
-                    onPressed: () {
-                      widget.scaffoldKey.currentState!.openDrawer();
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.black.withAlpha(20),
-                    ),
-                    icon: const Icon(Icons.login),
-                    label: const Text("Login"),
-                  )
-                : IconButton(
-                    onPressed: () {
-                      widget.scaffoldKey.currentState!.openDrawer();
-                    },
-                    padding: const EdgeInsets.all(4),
-                    icon: Auth.user?.photoURL == null
-                        ? const Icon(
-                            Icons.account_circle,
-                            color: Colors.grey,
-                            size: 32,
-                          )
-                        : Container(
-                            width: 32,
-                            height: 32,
-                            padding: const EdgeInsets.all(1),
-                            clipBehavior: Clip.hardEdge,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withAlpha(40),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.black.withAlpha(40),
-                              backgroundImage:
-                                  NetworkImage(Auth.user!.photoURL!),
-                            ),
-                          ),
-                  )
-          ]),
+        title: SearchWidget(
+          openDrawer: () => widget.scaffoldKey.currentState!.openDrawer(),
         ),
       ),
       body: memos.values.where((memo) => isVisible(viewMode, memo)).isEmpty
@@ -168,16 +124,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 return MemoWidget(memoKey: entry.key, memo: entry.value);
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: handleNew,
-        elevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        highlightElevation: 0,
-        disabledElevation: 0,
-        backgroundColor: Colors.black.withAlpha(30),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: viewMode == "Memos"
+          ? FloatingActionButton(
+              onPressed: handleNew,
+              elevation: 0,
+              focusElevation: 0,
+              hoverElevation: 0,
+              highlightElevation: 0,
+              disabledElevation: 0,
+              backgroundColor: Colors.black.withAlpha(30),
+              child: const Icon(Icons.add),
+            )
+          : null,
       drawer: Drawer(
         child: ListView(
           children: [
@@ -281,6 +239,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: viewMode == "Trash"
+          ? Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.black.withAlpha(10),
+              ),
+              child: const Text(
+                "All memos are entirely removed after 30 days of deletion.",
+                textAlign: TextAlign.center,
+              ),
+            )
+          : null,
     );
   }
 

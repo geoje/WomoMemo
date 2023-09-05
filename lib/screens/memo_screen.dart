@@ -38,7 +38,6 @@ class _MemoScreenState extends State<MemoScreen> {
   @override
   void dispose() async {
     ServicesBinding.instance.keyboard.removeHandler(_onKey);
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
     paletteTimer?.cancel();
     super.dispose();
@@ -60,65 +59,133 @@ class _MemoScreenState extends State<MemoScreen> {
         backgroundColor: ColorMap.background(memo.color),
         title: TextFormField(
           controller: titleController,
+          style: const TextStyle(fontWeight: FontWeight.bold),
           decoration: const InputDecoration(
             hintText: "Title",
             border: InputBorder.none,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: TextFormField(
-          controller: contentController,
-          maxLines: null,
-          decoration: const InputDecoration(
-            contentPadding: EdgeInsets.all(16),
-            hintText: "Content",
-            border: InputBorder.none,
-          ),
-          style: const TextStyle(fontWeight: FontWeight.w400),
-        ),
-      ),
+      body: memo.checked == null
+          ? SingleChildScrollView(
+              child: TextFormField(
+              controller: contentController,
+              maxLines: null,
+              style: const TextStyle(fontWeight: FontWeight.w400),
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(16),
+                hintText: "Content",
+                border: InputBorder.none,
+              ),
+            ))
+          : Theme(
+              data: ThemeData(canvasColor: ColorMap.background(memo.color)),
+              child: ReorderableListView(
+                children: [
+                  for (var entry in memo.content.split("\n").asMap().entries)
+                    CheckboxListTile(
+                      key: Key(entry.key.toString()),
+                      secondary: const Icon(Icons.drag_handle),
+                      controlAffinity: ListTileControlAffinity.leading,
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      value: memo.checked?.contains(entry.key),
+                      onChanged: (value) {
+                        if (value == null || !value) {
+                          memo.checked?.remove(entry.key);
+                        } else {
+                          memo.checked?.add(entry.key);
+                        }
+                        setState(() {});
+                      },
+                      title: Text(entry.value),
+                    )
+                ],
+                onReorder: (oldIndex, newIndex) {
+                  var lines = memo.content.split("\n");
+                  var line = lines[oldIndex];
+                  lines.removeAt(oldIndex);
+                  lines.insert(newIndex - (newIndex > oldIndex ? 1 : 0), line);
+
+                  memo.content = lines.join("\n");
+                  var oldChecked = memo.checked!.contains(oldIndex);
+                  if (memo.checked!.contains(newIndex)) {
+                    memo.checked?.add(oldIndex);
+                  } else {
+                    memo.checked?.remove(oldIndex);
+                  }
+                  if (oldChecked) {
+                    memo.checked?.add(newIndex);
+                  } else {
+                    memo.checked?.remove(newIndex);
+                  }
+                  setState(() {});
+                },
+              ),
+            ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: Colors.black.withAlpha(20)),
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Tooltip(
-                message: memo.checkbox ? "Disable Checkbox" : "Enable Checkbox",
-                child: IconButton(
-                  onPressed: handleAddingCheck,
-                  icon: Icon(memo.checkbox
-                      ? Icons.indeterminate_check_box
-                      : Icons.checklist),
-                ),
-              ),
-              Tooltip(
-                message: "Set Color",
-                child: IconButton(
-                  onPressed: handleColor,
-                  icon: const Icon(Icons.palette),
-                ),
-              ),
-              const Expanded(child: SizedBox()),
-              Tooltip(
-                message: memo.archive ? "Unarchive" : "Archive",
-                child: IconButton(
-                  onPressed: handleArchive,
-                  icon: Icon(
-                    memo.archive ? Icons.unarchive_outlined : Icons.archive,
+          child: memo.delete == null
+              ? Row(
+                  children: [
+                    Tooltip(
+                      message: memo.checked == null
+                          ? "Enable Checkbox"
+                          : "Disable Checkbox",
+                      child: IconButton(
+                        onPressed: handleAddingCheck,
+                        icon: Icon(memo.checked == null
+                            ? Icons.checklist
+                            : Icons.indeterminate_check_box),
+                      ),
+                    ),
+                    Tooltip(
+                      message: "Set Color",
+                      child: IconButton(
+                        onPressed: handleColor,
+                        icon: const Icon(Icons.palette),
+                      ),
+                    ),
+                    const Expanded(child: SizedBox()),
+                    Tooltip(
+                      message: memo.archive ? "Unarchive" : "Archive",
+                      child: IconButton(
+                        onPressed: handleArchive,
+                        icon: Icon(
+                          memo.archive
+                              ? Icons.unarchive_outlined
+                              : Icons.archive,
+                        ),
+                      ),
+                    ),
+                    Tooltip(
+                      message: "Delete",
+                      child: IconButton(
+                        onPressed: handleDelete,
+                        icon: const Icon(Icons.delete),
+                      ),
+                    ),
+                  ],
+                )
+              : Row(children: [
+                  Tooltip(
+                    message: "Restore",
+                    child: IconButton(
+                      onPressed: handleRestore,
+                      icon: const Icon(Icons.restore),
+                    ),
                   ),
-                ),
-              ),
-              Tooltip(
-                message: "Delete",
-                child: IconButton(
-                  onPressed: handleDelete,
-                  icon: const Icon(Icons.delete),
-                ),
-              ),
-            ],
-          ),
+                  const Expanded(child: SizedBox()),
+                  Tooltip(
+                    message: "Delete Forever",
+                    child: IconButton(
+                      onPressed: handleDeleteForever,
+                      icon: const Icon(Icons.delete_forever),
+                    ),
+                  ),
+                ]),
         ),
       ),
     );
@@ -135,7 +202,7 @@ class _MemoScreenState extends State<MemoScreen> {
   }
 
   void handleAddingCheck() {
-    setState(() => memo.checkbox = !memo.checkbox);
+    setState(() => memo.checked = memo.checked == null ? {} : null);
   }
 
   void handleColor() {
@@ -166,16 +233,26 @@ class _MemoScreenState extends State<MemoScreen> {
                         verticalOffset: -48,
                         showDuration: const Duration(milliseconds: 50),
                         child: ElevatedButton(
-                          child: null,
                           style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(0),
                             backgroundColor: ColorMap.background(colorKey),
                             side: BorderSide(
-                                color: ColorMap.border(colorKey),
-                                width: memo.color == colorKey ? 2 : 1),
+                              color: ColorMap.border(colorKey),
+                              width: 1,
+                            ),
                           ),
                           onPressed: () {
                             setState(() => memo.color = colorKey);
+                            ScaffoldMessenger.of(context).clearSnackBars();
+                            paletteTimer!.cancel();
+                            paletteTimer = null;
                           },
+                          child: memo.color == colorKey
+                              ? Icon(
+                                  Icons.check,
+                                  color: Colors.black.withAlpha(180),
+                                )
+                              : null,
                         ),
                       ),
                     ),
@@ -190,9 +267,20 @@ class _MemoScreenState extends State<MemoScreen> {
 
   void handleArchive() {
     setState(() => memo.archive = !memo.archive);
+    Navigator.pop(context);
   }
 
   void handleDelete() {
+    memo.delete = DateTime.now();
+    Navigator.pop(context);
+  }
+
+  void handleRestore() {
+    memo.delete = null;
+    Navigator.pop(context);
+  }
+
+  void handleDeleteForever() {
     RTDB.instance.ref("memos/${Auth.user!.uid}/${widget.memoKey}").remove();
     removing = true;
     Navigator.pop(context);

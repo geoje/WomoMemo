@@ -6,19 +6,18 @@ class Memo {
     this.content = "",
     this.color = "white",
     this.archive = false,
-    this.checkbox = false,
   });
   Memo.fromSnapshot(DataSnapshot snapshot)
       : title = snapshot.child("title").value.toString(),
         content = snapshot.child("content").value.toString(),
         color = (snapshot.child("color").value ?? Memo().color).toString(),
         archive = (snapshot.child("archive").value ?? Memo().archive) as bool,
-        checkbox =
-            (snapshot.child("checkbox").value ?? Memo().checkbox) as bool,
+        // checked = (snapshot.child("checked").value ?? {}) as Set<int>,
         delete = DateTime.tryParse(snapshot.child("delete").value.toString());
 
   String title, content, color;
-  bool archive, checkbox;
+  bool archive;
+  Set<int>? checked;
   DateTime? delete;
 
   Map<String, dynamic> toJson() {
@@ -27,7 +26,7 @@ class Memo {
       "content": content,
       "color": color,
       "archive": archive,
-      "checkbox": checkbox,
+      "checked": checked,
       "delete": delete?.toIso8601String(),
     });
   }

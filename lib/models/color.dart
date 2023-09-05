@@ -30,7 +30,11 @@ class ColorMap {
   }
 
   static Color border(String color) {
-    return (color == "clear" ? Colors.black12 : colors[color]?[100]) ??
+    return (color == "clear"
+            ? Colors.black12
+            : color == "grey"
+                ? Colors.grey[300]
+                : colors[color]?[100]) ??
         Colors.black12;
   }
 }

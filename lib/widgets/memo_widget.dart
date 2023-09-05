@@ -28,11 +28,23 @@ class MemoWidget extends StatelessWidget {
           children: [
             memo.title.isEmpty
                 ? const SizedBox.shrink()
-                : Text(
-                    memo.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        memo.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      memo.archive
+                          ? Icon(
+                              Icons.archive_outlined,
+                              size: 16,
+                              color: Colors.black.withAlpha(140),
+                            )
+                          : const SizedBox.shrink(),
+                    ],
                   ),
             memo.title.isEmpty || memo.content.isEmpty
                 ? const SizedBox.shrink()
