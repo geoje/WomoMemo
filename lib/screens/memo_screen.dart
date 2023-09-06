@@ -28,6 +28,7 @@ class _MemoScreenState extends State<MemoScreen> {
 
   Timer? paletteTimer;
   bool removing = false;
+  int slectedIndex = -1;
 
   @override
   void initState() {
@@ -113,8 +114,31 @@ class _MemoScreenState extends State<MemoScreen> {
                                 color: Colors.grey,
                               )
                             : null,
+                        onTap: () {
+                          setState(() => slectedIndex = i);
+                          print("[onTap] $slectedIndex");
+                        },
+                        // onTapOutside: (event) {
+                        //   if (slectedIndex == i) {
+                        //     setState(() => slectedIndex = -1);
+                        //     print("[onTapOutside] $slectedIndex");
+                        //   }
+                        // },
                       ),
-                      secondary: const Icon(Icons.drag_handle),
+                      secondary: SizedBox(
+                        width: 72,
+                        child: Row(
+                          children: [
+                            IconButton(
+                                onPressed: () {},
+                                icon: const Icon(
+                                  Icons.close,
+                                  size: 16,
+                                )),
+                            const Icon(Icons.drag_handle),
+                          ],
+                        ),
+                      ),
                       controlAffinity: ListTileControlAffinity.leading,
                       dense: true,
                       visualDensity: VisualDensity.compact,
