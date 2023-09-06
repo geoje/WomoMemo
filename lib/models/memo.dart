@@ -12,8 +12,16 @@ class Memo {
         content = snapshot.child("content").value.toString(),
         color = (snapshot.child("color").value ?? Memo().color).toString(),
         archive = (snapshot.child("archive").value ?? Memo().archive) as bool,
-        // checked = (snapshot.child("checked").value ?? {}) as Set<int>,
-        delete = DateTime.tryParse(snapshot.child("delete").value.toString());
+        delete = DateTime.tryParse(snapshot.child("delete").value.toString()) {
+    var checkedObj = snapshot.child("checked").value;
+    if (checkedObj != null) {
+      checked = {
+        ...checkedObj.toString().split(",").map((e) => int.tryParse(e) ?? -1)
+      };
+      checked!.remove(-1);
+      if (checked!.isEmpty) checked = null;
+    }
+  }
 
   String title, content, color;
   bool archive;
@@ -26,7 +34,7 @@ class Memo {
       "content": content,
       "color": color,
       "archive": archive,
-      "checked": checked,
+      "checked": checked?.join(","),
       "delete": delete?.toIso8601String(),
     });
   }

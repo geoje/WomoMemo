@@ -19,11 +19,12 @@ class SearchWidget extends StatelessWidget {
           icon: const Icon(Icons.menu),
         ),
         const Expanded(
-            flex: 1,
-            child: TextField(
-              decoration: InputDecoration(
-                  hintText: "Search your memos", border: InputBorder.none),
-            )),
+          flex: 1,
+          child: TextField(
+            decoration: InputDecoration(
+                hintText: "Search your memos", border: InputBorder.none),
+          ),
+        ),
         Auth.user == null
             ? TextButton.icon(
                 onPressed: openDrawer,

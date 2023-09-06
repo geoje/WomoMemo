@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: viewMode == "Trash"
           ? Container(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.black.withAlpha(10),
               ),

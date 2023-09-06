@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:womomemo/models/checkItem.dart';
 import 'package:womomemo/models/color.dart';
 import 'package:womomemo/models/memo.dart';
 import 'package:womomemo/services/auth.dart';
@@ -19,8 +20,11 @@ class MemoScreen extends StatefulWidget {
 }
 
 class _MemoScreenState extends State<MemoScreen> {
-  late final TextEditingController titleController, contentController;
+  late final TextEditingController titleController,
+      contentController,
+      addController;
   late Memo memo;
+  late List<CheckItem> checkItems = [];
 
   Timer? paletteTimer;
   bool removing = false;
@@ -32,7 +36,12 @@ class _MemoScreenState extends State<MemoScreen> {
 
     titleController = TextEditingController(text: widget.memo?.title);
     contentController = TextEditingController(text: widget.memo?.content);
+    addController = TextEditingController();
     memo = widget.memo ?? Memo();
+    if (memo.checked != null) {
+      memo.content.split("\n").asMap().forEach((key, value) =>
+          checkItems.add(CheckItem(checked: memo.checked!.contains(key))));
+    }
   }
 
   @override
@@ -45,6 +54,10 @@ class _MemoScreenState extends State<MemoScreen> {
 
     memo.title = titleController.text;
     memo.content = contentController.text;
+    if (checkItems.isNotEmpty) {
+      memo.checked = {};
+      // dodododo
+    }
     await RTDB.instance
         .ref("memos/${Auth.user!.uid}/${widget.memoKey}")
         .set(memo.toJson());
@@ -81,46 +94,62 @@ class _MemoScreenState extends State<MemoScreen> {
           : Theme(
               data: ThemeData(canvasColor: ColorMap.background(memo.color)),
               child: ReorderableListView(
+                onReorder: handleReorder,
                 children: [
-                  for (var entry in memo.content.split("\n").asMap().entries)
+                  for (int i = 0; i < checkItems.length; i++)
                     CheckboxListTile(
-                      key: Key(entry.key.toString()),
+                      key: Key(i.toString()),
+                      title: TextFormField(
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                        ),
+                        initialValue: checkItems[i].controller.text,
+                        style: memo.checked!.contains(i)
+                            ? const TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                color: Colors.grey,
+                              )
+                            : null,
+                      ),
                       secondary: const Icon(Icons.drag_handle),
                       controlAffinity: ListTileControlAffinity.leading,
                       dense: true,
                       visualDensity: VisualDensity.compact,
-                      value: memo.checked?.contains(entry.key),
+                      activeColor: Colors.grey,
+                      value: memo.checked?.contains(i),
                       onChanged: (value) {
                         if (value == null || !value) {
-                          memo.checked?.remove(entry.key);
+                          memo.checked?.remove(i);
                         } else {
-                          memo.checked?.add(entry.key);
+                          memo.checked?.add(i);
                         }
                         setState(() {});
                       },
-                      title: Text(entry.value),
-                    )
+                    ),
+                  ListTile(
+                    key: const Key("Add"),
+                    leading: const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Icon(Icons.add),
+                    ),
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
+                    title: TextField(
+                      controller: addController,
+                      decoration: const InputDecoration(
+                        hintText: "List Item",
+                        border: InputBorder.none,
+                        isDense: true,
+                      ),
+                      onSubmitted: (value) {
+                        memo.content += "\n$value";
+                        addController.text = "";
+                        setState(() {});
+                      },
+                    ),
+                  )
                 ],
-                onReorder: (oldIndex, newIndex) {
-                  var lines = memo.content.split("\n");
-                  var line = lines[oldIndex];
-                  lines.removeAt(oldIndex);
-                  lines.insert(newIndex - (newIndex > oldIndex ? 1 : 0), line);
-
-                  memo.content = lines.join("\n");
-                  var oldChecked = memo.checked!.contains(oldIndex);
-                  if (memo.checked!.contains(newIndex)) {
-                    memo.checked?.add(oldIndex);
-                  } else {
-                    memo.checked?.remove(oldIndex);
-                  }
-                  if (oldChecked) {
-                    memo.checked?.add(newIndex);
-                  } else {
-                    memo.checked?.remove(newIndex);
-                  }
-                  setState(() {});
-                },
               ),
             ),
       bottomNavigationBar: Container(
@@ -284,5 +313,39 @@ class _MemoScreenState extends State<MemoScreen> {
     RTDB.instance.ref("memos/${Auth.user!.uid}/${widget.memoKey}").remove();
     removing = true;
     Navigator.pop(context);
+  }
+
+  void handleReorder(int oldIndex, int newIndex) {
+    if (newIndex > oldIndex) newIndex--;
+
+    // Update content
+    var lines = memo.content.split("\n");
+    var line = lines[oldIndex];
+    lines.removeAt(oldIndex);
+    lines.insert(newIndex, line);
+    memo.content = lines.join("\n");
+
+    // Update checked
+    var moveValue = memo.checked!.contains(oldIndex);
+    if (newIndex > oldIndex) {
+      for (int i = oldIndex; i < newIndex; i++) {
+        if (memo.checked!.contains(i + 1)) {
+          memo.checked!.add(i);
+        } else {
+          memo.checked!.remove(i);
+        }
+      }
+    } else {
+      for (int i = oldIndex; i > newIndex; i--) {
+        if (memo.checked!.contains(i - 1)) {
+          memo.checked!.add(i);
+        } else {
+          memo.checked!.remove(i);
+        }
+      }
+    }
+    if (moveValue) memo.checked!.add(newIndex);
+
+    setState(() {});
   }
 }

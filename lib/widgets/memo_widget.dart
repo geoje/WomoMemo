@@ -43,7 +43,13 @@ class MemoWidget extends StatelessWidget {
                               size: 16,
                               color: Colors.black.withAlpha(140),
                             )
-                          : const SizedBox.shrink(),
+                          : memo.delete != null
+                              ? Icon(
+                                  Icons.auto_delete_outlined,
+                                  size: 16,
+                                  color: Colors.red.withAlpha(140),
+                                )
+                              : const SizedBox.shrink(),
                     ],
                   ),
             memo.title.isEmpty || memo.content.isEmpty
@@ -55,12 +61,47 @@ class MemoWidget extends StatelessWidget {
                 ? const SizedBox.shrink()
                 : ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 160),
-                    child: Text(
-                      memo.content,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+                    child: memo.checked == null
+                        ? Text(
+                            memo.content,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w400,
+                            ),
+                          )
+                        : ListView(
+                            children: [
+                              for (var entry
+                                  in memo.content.split("\n").asMap().entries)
+                                Row(
+                                  key: Key(entry.key.toString()),
+                                  children: [
+                                    Transform.scale(
+                                      scale: 0.6,
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: IgnorePointer(
+                                          child: Checkbox(
+                                            activeColor: Colors.grey,
+                                            value: memo.checked
+                                                ?.contains(entry.key),
+                                            onChanged: (value) {},
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      entry.value,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                            ],
+                          ),
                   ),
           ],
         ),
