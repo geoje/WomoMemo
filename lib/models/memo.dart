@@ -19,7 +19,6 @@ class Memo {
         ...checkedObj.toString().split(",").map((e) => int.tryParse(e) ?? -1)
       };
       checked!.remove(-1);
-      if (checked!.isEmpty) checked = null;
     }
   }
 

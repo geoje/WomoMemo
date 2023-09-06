@@ -62,13 +62,16 @@ class MemoWidget extends StatelessWidget {
                 : ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 160),
                     child: memo.checked == null
-                        ? Text(
-                            memo.content,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w400,
+                        ? SingleChildScrollView(
+                            child: Text(
+                              memo.content,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
                           )
                         : ListView(
+                            shrinkWrap: true,
                             children: [
                               for (var entry
                                   in memo.content.split("\n").asMap().entries)
@@ -93,9 +96,16 @@ class MemoWidget extends StatelessWidget {
                                     const SizedBox(width: 4),
                                     Text(
                                       entry.value,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400,
+                                        decoration:
+                                            memo.checked!.contains(entry.key)
+                                                ? TextDecoration.lineThrough
+                                                : null,
+                                        color: memo.checked!.contains(entry.key)
+                                            ? Colors.grey
+                                            : null,
                                       ),
                                     ),
                                   ],

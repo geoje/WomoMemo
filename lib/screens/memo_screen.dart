@@ -38,10 +38,7 @@ class _MemoScreenState extends State<MemoScreen> {
     contentController = TextEditingController(text: widget.memo?.content);
     addController = TextEditingController();
     memo = widget.memo ?? Memo();
-    if (memo.checked != null) {
-      memo.content.split("\n").asMap().forEach((key, value) =>
-          checkItems.add(CheckItem(checked: memo.checked!.contains(key))));
-    }
+    if (memo.checked != null) handleAddingCheck();
   }
 
   @override
@@ -56,7 +53,12 @@ class _MemoScreenState extends State<MemoScreen> {
     memo.content = contentController.text;
     if (checkItems.isNotEmpty) {
       memo.checked = {};
-      // dodododo
+      for (int i = 0; i < checkItems.length; i++) {
+        if (checkItems[i].checked) {
+          memo.checked!.add(i);
+        }
+      }
+      memo.content = checkItems.map((e) => e.controller.text).join("\n");
     }
     await RTDB.instance
         .ref("memos/${Auth.user!.uid}/${widget.memoKey}")
@@ -79,7 +81,7 @@ class _MemoScreenState extends State<MemoScreen> {
           ),
         ),
       ),
-      body: memo.checked == null
+      body: checkItems.isEmpty
           ? SingleChildScrollView(
               child: TextFormField(
               controller: contentController,
@@ -100,12 +102,12 @@ class _MemoScreenState extends State<MemoScreen> {
                     CheckboxListTile(
                       key: Key(i.toString()),
                       title: TextFormField(
+                        controller: checkItems[i].controller,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           isDense: true,
                         ),
-                        initialValue: checkItems[i].controller.text,
-                        style: memo.checked!.contains(i)
+                        style: checkItems[i].checked
                             ? const TextStyle(
                                 decoration: TextDecoration.lineThrough,
                                 color: Colors.grey,
@@ -117,13 +119,9 @@ class _MemoScreenState extends State<MemoScreen> {
                       dense: true,
                       visualDensity: VisualDensity.compact,
                       activeColor: Colors.grey,
-                      value: memo.checked?.contains(i),
+                      value: checkItems[i].checked,
                       onChanged: (value) {
-                        if (value == null || !value) {
-                          memo.checked?.remove(i);
-                        } else {
-                          memo.checked?.add(i);
-                        }
+                        checkItems[i].checked = value ?? false;
                         setState(() {});
                       },
                     ),
@@ -142,11 +140,7 @@ class _MemoScreenState extends State<MemoScreen> {
                         border: InputBorder.none,
                         isDense: true,
                       ),
-                      onSubmitted: (value) {
-                        memo.content += "\n$value";
-                        addController.text = "";
-                        setState(() {});
-                      },
+                      onSubmitted: handleAdd,
                     ),
                   )
                 ],
@@ -160,12 +154,12 @@ class _MemoScreenState extends State<MemoScreen> {
               ? Row(
                   children: [
                     Tooltip(
-                      message: memo.checked == null
+                      message: checkItems.isEmpty
                           ? "Enable Checkbox"
                           : "Disable Checkbox",
                       child: IconButton(
                         onPressed: handleAddingCheck,
-                        icon: Icon(memo.checked == null
+                        icon: Icon(checkItems.isEmpty
                             ? Icons.checklist
                             : Icons.indeterminate_check_box),
                       ),
@@ -231,7 +225,20 @@ class _MemoScreenState extends State<MemoScreen> {
   }
 
   void handleAddingCheck() {
-    setState(() => memo.checked = memo.checked == null ? {} : null);
+    if (checkItems.isNotEmpty) {
+      checkItems.clear();
+      memo.checked = null;
+    } else {
+      memo.checked ??= {};
+      contentController.text
+          .split("\n")
+          .asMap()
+          .forEach((key, value) => checkItems.add(CheckItem(
+                checked: memo.checked!.contains(key),
+                text: value,
+              )));
+    }
+    setState(() => {});
   }
 
   void handleColor() {
@@ -316,36 +323,14 @@ class _MemoScreenState extends State<MemoScreen> {
   }
 
   void handleReorder(int oldIndex, int newIndex) {
-    if (newIndex > oldIndex) newIndex--;
+    checkItems.insert(newIndex, checkItems[oldIndex]);
+    checkItems.removeAt(oldIndex + (newIndex < oldIndex ? 1 : 0));
+    setState(() {});
+  }
 
-    // Update content
-    var lines = memo.content.split("\n");
-    var line = lines[oldIndex];
-    lines.removeAt(oldIndex);
-    lines.insert(newIndex, line);
-    memo.content = lines.join("\n");
-
-    // Update checked
-    var moveValue = memo.checked!.contains(oldIndex);
-    if (newIndex > oldIndex) {
-      for (int i = oldIndex; i < newIndex; i++) {
-        if (memo.checked!.contains(i + 1)) {
-          memo.checked!.add(i);
-        } else {
-          memo.checked!.remove(i);
-        }
-      }
-    } else {
-      for (int i = oldIndex; i > newIndex; i--) {
-        if (memo.checked!.contains(i - 1)) {
-          memo.checked!.add(i);
-        } else {
-          memo.checked!.remove(i);
-        }
-      }
-    }
-    if (moveValue) memo.checked!.add(newIndex);
-
+  void handleAdd(String value) {
+    checkItems.add(CheckItem(checked: false, text: value));
+    addController.text = "";
     setState(() {});
   }
 }
