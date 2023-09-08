@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:womomemo/models/memo.dart';
 import 'package:womomemo/models/navItem.dart';
 import 'package:womomemo/screens/memo_screen.dart';
@@ -10,6 +13,9 @@ import 'package:womomemo/widgets/drawer_widget.dart';
 import 'package:womomemo/widgets/memo_widget.dart';
 import 'package:womomemo/widgets/search_widget.dart';
 
+const appGroupId = '<YOUR APP GROUP>';
+const iOSWidgetName = 'MemoWidgets';
+const androidWidgetName = 'MemoWidget';
 const maxPreviewLines = 10;
 
 class HomeScreen extends StatefulWidget {
@@ -29,6 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
+    HomeWidget.setAppGroupId(appGroupId);
+
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       setState(() {
         Auth.user = user;
@@ -39,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Set listener
           memosRef.onValue.listen((event) {
+            // Refresh memo state
             memos.clear();
             for (final child in event.snapshot.children) {
               Memo memo = Memo.fromSnapshot(child);
@@ -52,7 +61,16 @@ class _HomeScreenState extends State<HomeScreen> {
               }
               memos[child.key!] = memo;
             }
+
+            // Update state
             setState(() {});
+
+            // Push data to home widget
+            HomeWidget.saveWidgetData<String>("memosJson", jsonEncode(memos));
+            HomeWidget.updateWidget(
+              iOSName: iOSWidgetName,
+              androidName: androidWidgetName,
+            );
           });
 
           // Delete listener
