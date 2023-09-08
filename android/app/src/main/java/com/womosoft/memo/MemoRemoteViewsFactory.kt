@@ -18,8 +18,7 @@ class MemoRemoteViewsFactory(
     override fun getCount(): Int = memos.size
 
     override fun getViewAt(position: Int): RemoteViews {
-
-        return RemoteViews(context.packageName, R.layout.memo_list_item);
+        return RemoteViews(context.packageName, R.layout.memo_list_item)
     }
 
     override fun getLoadingView(): RemoteViews? = null
