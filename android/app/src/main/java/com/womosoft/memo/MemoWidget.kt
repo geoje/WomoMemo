@@ -10,9 +10,7 @@ import com.google.gson.reflect.TypeToken
 import es.antonborri.home_widget.HomeWidgetPlugin
 
 
-
 class MemoWidget : AppWidgetProvider() {
-    val gson = Gson()
 
     override fun onUpdate(
         context: Context,
@@ -25,11 +23,9 @@ class MemoWidget : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.memo_widget).apply {
 
                 val memosJson = widgetData.getString("memosJson", "{}") ?: "{}"
-                val type = object:TypeToken<Map<String, Memo>>(){}.type
-                val memos = gson.fromJson<Map<String, Memo>>(memosJson, type)
-
-                val serviceIntent = Intent(context, MyRemoteViewsService::class.java)
-                setRemoteAdapter(R.id.lvMain, adapter);
+                val serviceIntent = Intent(context, MemoRemoteViewsService::class.java)
+                serviceIntent.putExtra("memosJson", memosJson)
+                setRemoteAdapter(R.id.lvMain, serviceIntent)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
