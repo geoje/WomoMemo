@@ -5,79 +5,8 @@
     android:orientation="vertical"
     android:theme="@style/Theme.Android.AppWidgetContainer">
 
-
-    <LinearLayout
+    <ListView
+        android:id="@+id/lvMain"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/app_widget_inner_view_background"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/memo_widget_title1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="Title"
-            android:text="Title"
-            android:textColor="#000"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/memo_widget_content1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:contentDescription="Content"
-            android:text="Content"
-            android:textColor="#000" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:background="@drawable/app_widget_inner_view_background"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/memo_widget_title2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="Title"
-            android:text="Title"
-            android:textColor="#000"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/memo_widget_content2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:contentDescription="Content"
-            android:text="Content"
-            android:textColor="#000" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:background="@drawable/app_widget_inner_view_background"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="Title"
-            android:text="Title"
-            android:textColor="#000"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:contentDescription="Content"
-            android:text="Content"
-            android:textColor="#000" />
-    </LinearLayout>
+        android:layout_height="match_parent" />
 </LinearLayout>
