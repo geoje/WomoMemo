@@ -66,7 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
             setState(() {});
 
             // Push data to home widget
-            HomeWidget.saveWidgetData<String>("memosJson", jsonEncode(memos));
+            var homeWidgetMemos = {...memos};
+            homeWidgetMemos.removeWhere(
+                (key, value) => value.archive || value.delete != null);
+            HomeWidget.saveWidgetData<String>(
+                "memosJson", jsonEncode(homeWidgetMemos));
             HomeWidget.updateWidget(
               iOSName: iOSWidgetName,
               androidName: androidWidgetName,
