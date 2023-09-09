@@ -21,7 +21,7 @@ class MemoRemoteViewsFactory(
         val memosJson = intent.getStringExtra("memosJson") ?: "{}"
         val type = object : TypeToken<Map<String, Memo>>() {}.type
         memos = gson.fromJson(memosJson, type)
-        Log.v("Changed:memos", memos.toString())
+        Log.v("Changed:memosJson", memosJson)
     }
 
     override fun onDestroy() {}
