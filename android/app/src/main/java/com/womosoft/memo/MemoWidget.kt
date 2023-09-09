@@ -19,17 +19,11 @@ class MemoWidget : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         for (appWidgetId in appWidgetIds) {
-            val widgetData = HomeWidgetPlugin.getData(context)
-            val memosJson = widgetData.getString("memosJson", "{}") ?: "{}"
 
-            val serviceIntent = Intent(context, MemoRemoteViewsService::class.java).apply {
-                putExtra("memosJson", memosJson)
-            }
+            val serviceIntent = Intent(context, MemoRemoteViewsService::class.java)
             val views = RemoteViews(context.packageName, R.layout.memo_widget).apply {
                 setRemoteAdapter(R.id.lvMain, serviceIntent)
             }
-
-            Log.v("onUpdate:memosJson", memosJson)
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.lvMain)

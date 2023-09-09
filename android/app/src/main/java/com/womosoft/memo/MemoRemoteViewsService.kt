@@ -8,6 +8,6 @@ import com.google.gson.reflect.TypeToken
 
 class MemoRemoteViewsService: RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
-        return MemoRemoteViewsFactory(this.applicationContext, intent)
+        return MemoRemoteViewsFactory(this.applicationContext)
     }
 }

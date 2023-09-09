@@ -1,16 +1,15 @@
 package com.womosoft.memo
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import es.antonborri.home_widget.HomeWidgetPlugin
 
 class MemoRemoteViewsFactory(
-    private val context: Context,
-    private val intent: Intent
+    private val context: Context
 ) : RemoteViewsService.RemoteViewsFactory {
     private val gson = Gson()
     private lateinit var memos: Map<String, Memo>
@@ -18,10 +17,10 @@ class MemoRemoteViewsFactory(
     override fun onCreate() {}
 
     override fun onDataSetChanged() {
-        val memosJson = intent.getStringExtra("memosJson") ?: "{}"
+        val widgetData = HomeWidgetPlugin.getData(context)
+        val memosJson = widgetData.getString("memosJson", "{}") ?: "{}"
         val type = object : TypeToken<Map<String, Memo>>() {}.type
         memos = gson.fromJson(memosJson, type)
-        Log.v("Changed:memosJson", memosJson)
     }
 
     override fun onDestroy() {}
@@ -29,10 +28,13 @@ class MemoRemoteViewsFactory(
     override fun getCount(): Int = memos.size
 
     override fun getViewAt(position: Int): RemoteViews {
+        val key: String = memos.keys.toList()[position]
+        val memo = memos[key]!!
+
         return RemoteViews(context.packageName, R.layout.memo_list_item).apply {
-            val key: String = memos.keys.toList()[position]
-            setTextViewText(R.id.tvTitle, memos[key]?.title)
-            setTextViewText(R.id.tvContent, memos[key]?.content)
+            setTextViewText(R.id.tvTitle, memo.title)
+            setTextViewText(R.id.tvContent, memo.content)
+            setInt(R.id.llMemoListItem, "setBackgroundColor", memo.backgroundColor(context))
         }
     }
 
