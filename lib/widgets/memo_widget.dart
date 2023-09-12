@@ -47,7 +47,12 @@ class MemoWidget extends StatelessWidget {
                               ? Icon(
                                   Icons.auto_delete_outlined,
                                   size: 16,
-                                  color: Colors.red.withAlpha(140),
+                                  color: Colors.red.withAlpha(DateTime.now()
+                                              .difference(memo.delete!)
+                                              .inDays >
+                                          28
+                                      ? 240
+                                      : 100),
                                 )
                               : const SizedBox.shrink(),
                     ],
