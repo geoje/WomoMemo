@@ -171,7 +171,7 @@ class _MemoScreenState extends State<MemoScreen> {
               ),
             ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: Colors.black.withAlpha(20)),
+        decoration: BoxDecoration(color: ColorMap.border(memo.color)),
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: memo.delete == null
