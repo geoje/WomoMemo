@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:womomemo/models/navItem.dart';
 import 'package:womomemo/services/auth.dart';
 
@@ -39,20 +39,31 @@ class _DrawerWidgetState extends State<DrawerWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 IconButton(
-                  onPressed: () => setState(() {
-                    viewWomosoft = !viewWomosoft;
-                  }),
-                  icon: SvgPicture.asset(
-                    "assets/womosoft.svg",
-                    width: 24,
-                    height: 24,
-                    colorFilter: viewWomosoft
-                        ? null
-                        : ColorFilter.mode(
+                  onPressed: () {
+                    if (!viewWomosoft) {
+                      launchUrl(Uri.parse("https://www.womosoft.com/"));
+                    }
+                    setState(() {
+                      viewWomosoft = !viewWomosoft;
+                    });
+                  },
+                  icon: viewWomosoft
+                      ? Image.asset(
+                          "assets/womosoft.png",
+                          width: 24,
+                          height: 24,
+                        )
+                      : ColorFiltered(
+                          colorFilter: ColorFilter.mode(
                             Theme.of(context).primaryColor,
                             BlendMode.srcIn,
                           ),
-                  ),
+                          child: Image.asset(
+                            "assets/womosoft.png",
+                            width: 24,
+                            height: 24,
+                          ),
+                        ),
                 ),
                 Auth.user == null
                     ? const SizedBox()
