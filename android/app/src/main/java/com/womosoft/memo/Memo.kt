@@ -2,6 +2,7 @@ package com.womosoft.memo
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 
 data class Memo(
     val title: String = "",
@@ -18,7 +19,11 @@ data class Memo(
             "color",
             context.packageName
         )
-        return context.resources.getColor(resId, context.theme)
+        return try {
+            context.resources.getColor(resId, context.theme)
+        } catch(ex: Exception) {
+            context.resources.getColor(R.color.white_1000, context.theme)
+        }
     }
     @SuppressLint("DiscouragedApi")
     fun borderColor(context: Context): Int {
@@ -27,12 +32,16 @@ data class Memo(
             "color",
             context.packageName
         )
-        return context.resources.getColor(resId, context.theme)
+        return try {
+            context.resources.getColor(resId, context.theme)
+        } catch(ex: Exception) {
+            context.resources.getColor(R.color.green_300, context.theme)
+        }
     }
     private fun camelToSnake(str: String): String {
         for (i in str.length - 1 downTo 0) {
             if (Character.isUpperCase(str[i])) {
-                return "${str.substring(0, i)}_${str[i].lowercase()}${str.substring(i)}"
+                return "${str.substring(0, i)}_${str[i].lowercase()}${str.substring(i+1)}"
             }
         }
         return str
