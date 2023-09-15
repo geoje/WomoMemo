@@ -99,18 +99,21 @@ class MemoWidget extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(width: 4),
-                                    Text(
-                                      entry.value,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
-                                        decoration:
-                                            memo.checked!.contains(entry.key)
-                                                ? TextDecoration.lineThrough
-                                                : null,
-                                        color: memo.checked!.contains(entry.key)
-                                            ? Colors.grey
-                                            : null,
+                                    Flexible(
+                                      child: Text(
+                                        entry.value,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          decoration:
+                                              memo.checked!.contains(entry.key)
+                                                  ? TextDecoration.lineThrough
+                                                  : null,
+                                          color:
+                                              memo.checked!.contains(entry.key)
+                                                  ? Colors.grey
+                                                  : null,
+                                        ),
                                       ),
                                     ),
                                   ],

@@ -1,7 +1,7 @@
 package com.womosoft.memo
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.google.gson.Gson
@@ -21,6 +21,8 @@ class MemoRemoteViewsFactory(
         val memosJson = widgetData.getString("memosJson", "{}") ?: "{}"
         val type = object : TypeToken<Map<String, Memo>>() {}.type
         memos = gson.fromJson(memosJson, type)
+
+        Log.v("[Factory memosJson]", memosJson)
     }
 
     override fun onDestroy() {}
@@ -30,6 +32,8 @@ class MemoRemoteViewsFactory(
     override fun getViewAt(position: Int): RemoteViews {
         val key: String = memos.keys.toList()[position]
         val memo = memos[key]!!
+
+        Log.v("[Factory getViewAt position]", position.toString())
 
         return RemoteViews(context.packageName, R.layout.memo_list_item).apply {
             setTextViewText(R.id.tvTitle, memo.title)

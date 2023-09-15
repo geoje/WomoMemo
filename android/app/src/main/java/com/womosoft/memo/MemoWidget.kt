@@ -6,9 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import es.antonborri.home_widget.HomeWidgetPlugin
 
 
 class MemoWidget : AppWidgetProvider() {
@@ -19,11 +16,11 @@ class MemoWidget : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         for (appWidgetId in appWidgetIds) {
-
             val serviceIntent = Intent(context, MemoRemoteViewsService::class.java)
             val views = RemoteViews(context.packageName, R.layout.memo_widget).apply {
                 setRemoteAdapter(R.id.lvMain, serviceIntent)
             }
+            Log.v("[Factory appWidgetId]", appWidgetId.toString())
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.lvMain)
