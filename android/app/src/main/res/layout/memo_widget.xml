@@ -6,7 +6,7 @@
     android:theme="@style/Theme.Android.AppWidgetContainer">
 
     <ListView
-        android:id="@+id/lvMain"
+        android:id="@+id/lstMain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:divider="@android:color/transparent"

@@ -24,10 +24,14 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/txtDivider"
+            android:layout_width="match_parent"
+            android:layout_height="4dp" />
+
+        <TextView
             android:id="@+id/txtContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:textColor="@color/black_1000" />
     </LinearLayout>
 </FrameLayout>

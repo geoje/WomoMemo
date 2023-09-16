@@ -1,7 +1,8 @@
 package com.womosoft.memo
 
 import android.content.Context
-import android.util.Log
+import android.content.Intent
+import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.google.gson.Gson
@@ -21,8 +22,6 @@ class MemoRemoteViewsFactory(
         val memosJson = widgetData.getString("memosJson", "{}") ?: "{}"
         val type = object : TypeToken<Map<String, Memo>>() {}.type
         memos = gson.fromJson(memosJson, type)
-
-        Log.v("[Factory memosJson]", memosJson)
     }
 
     override fun onDestroy() {}
@@ -36,6 +35,10 @@ class MemoRemoteViewsFactory(
         return RemoteViews(context.packageName, R.layout.memo_list_item).apply {
             // Title
             setTextViewText(R.id.txtTitle, memo.title)
+            setViewVisibility(R.id.txtTitle, if (memo.title.isEmpty()) View.GONE else View.VISIBLE)
+
+            // Divider
+            setViewVisibility(R.id.txtDivider, if (memo.content.isEmpty() || memo.title.isEmpty()) View.GONE else View.VISIBLE)
 
             // Content
             if (memo.checked == null) setTextViewText(R.id.txtContent, memo.content)
@@ -49,9 +52,16 @@ class MemoRemoteViewsFactory(
                     .foldIndexed("") { index, acc, s -> "$acc\n${if (checked.contains(index)) "☑" else "☐"} $s" }
                 setTextViewText(R.id.txtContent, content)
             }
+            setViewVisibility(R.id.txtContent, if (memo.content.isEmpty() && memo.title.isNotEmpty()) View.GONE else View.VISIBLE)
 
             // Background
             setInt(R.id.imgBackground, "setColorFilter", memo.backgroundColor(context))
+
+            // Click to launch
+            val fillInIntent = Intent().apply {
+                putExtra("key", key)
+            }
+            setOnClickFillInIntent(R.id.txtContent, fillInIntent)
         }
     }
 
