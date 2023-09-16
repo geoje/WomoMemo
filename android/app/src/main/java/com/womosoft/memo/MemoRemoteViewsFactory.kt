@@ -33,12 +33,25 @@ class MemoRemoteViewsFactory(
         val key: String = memos.keys.toList()[position]
         val memo = memos[key]!!
 
-        Log.v("[Factory getViewAt position]", position.toString())
-
         return RemoteViews(context.packageName, R.layout.memo_list_item).apply {
-            setTextViewText(R.id.tvTitle, memo.title)
-            setTextViewText(R.id.tvContent, memo.content)
-            setInt(R.id.llMemoListItem, "setBackgroundColor", memo.backgroundColor(context))
+            // Title
+            setTextViewText(R.id.txtTitle, memo.title)
+
+            // Content
+            if (memo.checked == null) setTextViewText(R.id.txtContent, memo.content)
+            else {
+                val checked = try {
+                    memo.checked.split(",").map { it.toInt() }.toSet()
+                } catch (ex: Exception) {
+                    HashSet()
+                }
+                val content = memo.content.lines()
+                    .foldIndexed("") { index, acc, s -> "$acc\n${if (checked.contains(index)) "☑" else "☐"} $s" }
+                setTextViewText(R.id.txtContent, content)
+            }
+
+            // Background
+            setInt(R.id.imgBackground, "setColorFilter", memo.backgroundColor(context))
         }
     }
 

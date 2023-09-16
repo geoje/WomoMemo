@@ -2,4 +2,5 @@
 <resources>
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">View all memos</string>
+    <string name="app_widget_background">Background</string>
 </resources>
