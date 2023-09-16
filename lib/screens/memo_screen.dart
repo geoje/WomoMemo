@@ -28,7 +28,8 @@ class _MemoScreenState extends State<MemoScreen> {
 
   Timer? paletteTimer;
   bool removing = false;
-  int slectedIndex = -1;
+  int selectedIndex = -1;
+  var focusNode = FocusNode();
 
   @override
   void initState() {
@@ -98,6 +99,25 @@ class _MemoScreenState extends State<MemoScreen> {
               data: ThemeData(canvasColor: ColorMap.background(memo.color)),
               child: ReorderableListView(
                 onReorder: handleReorder,
+                footer: ListTile(
+                  key: const Key("Add"),
+                  leading: const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Icon(Icons.add),
+                  ),
+                  dense: true,
+                  visualDensity: VisualDensity.compact,
+                  title: TextField(
+                    controller: addController,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      hintText: "List Item",
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                    onSubmitted: handleAdd,
+                  ),
+                ),
                 children: [
                   for (int i = 0; i < checkItems.length; i++)
                     CheckboxListTile(
@@ -114,27 +134,19 @@ class _MemoScreenState extends State<MemoScreen> {
                                 color: Colors.grey,
                               )
                             : null,
-                        onTap: () {
-                          setState(() => slectedIndex = i);
-                          print("[onTap] $slectedIndex");
-                        },
-                        // onTapOutside: (event) {
-                        //   if (slectedIndex == i) {
-                        //     setState(() => slectedIndex = -1);
-                        //     print("[onTapOutside] $slectedIndex");
-                        //   }
-                        // },
                       ),
                       secondary: SizedBox(
                         width: 72,
                         child: Row(
                           children: [
                             IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.close,
-                                  size: 16,
-                                )),
+                              icon: const Icon(Icons.close),
+                              splashRadius: 20,
+                              onPressed: () {
+                                checkItems.removeAt(i);
+                                setState(() {});
+                              },
+                            ),
                             const Icon(Icons.drag_handle),
                           ],
                         ),
@@ -148,25 +160,7 @@ class _MemoScreenState extends State<MemoScreen> {
                         checkItems[i].checked = value ?? false;
                         setState(() {});
                       },
-                    ),
-                  ListTile(
-                    key: const Key("Add"),
-                    leading: const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(Icons.add),
-                    ),
-                    dense: true,
-                    visualDensity: VisualDensity.compact,
-                    title: TextField(
-                      controller: addController,
-                      decoration: const InputDecoration(
-                        hintText: "List Item",
-                        border: InputBorder.none,
-                        isDense: true,
-                      ),
-                      onSubmitted: handleAdd,
-                    ),
-                  )
+                    )
                 ],
               ),
             ),
@@ -250,8 +244,11 @@ class _MemoScreenState extends State<MemoScreen> {
 
   void handleAddingCheck() {
     if (checkItems.isNotEmpty) {
-      checkItems.clear();
       memo.checked = null;
+      contentController.text = checkItems
+          .map((e) => e.controller.text)
+          .reduce((value, element) => "$value\n$element");
+      checkItems.clear();
     } else {
       memo.checked ??= {};
       contentController.text
@@ -355,6 +352,7 @@ class _MemoScreenState extends State<MemoScreen> {
   void handleAdd(String value) {
     checkItems.add(CheckItem(checked: false, text: value));
     addController.text = "";
+    focusNode.requestFocus();
     setState(() {});
   }
 }
