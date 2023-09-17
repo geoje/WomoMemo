@@ -50,6 +50,7 @@ class MemoRemoteViewsFactory(
                 }
                 val content = memo.content.lines()
                     .foldIndexed("") { index, acc, s -> "$acc\n${if (checked.contains(index)) "☑" else "☐"} $s" }
+                    .removePrefix("\n")
                 setTextViewText(R.id.txtContent, content)
             }
             setViewVisibility(R.id.txtContent, if (memo.content.isEmpty() && memo.title.isNotEmpty()) View.GONE else View.VISIBLE)
