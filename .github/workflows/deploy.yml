@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  web:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +30,6 @@ jobs:
       - name: 🚚 Deploy web to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_WOMOSO }}"
           channelId: live
           projectId: womoso
@@ -39,5 +38,5 @@ jobs:
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{secrets.FIREBASE_APP_ID}}
-          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WOMOSO }}
           file: app/build/outputs/apk/release/app-release.aab
