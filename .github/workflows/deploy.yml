@@ -24,19 +24,18 @@ jobs:
       - name: 🛠️ Build web
         run: flutter build web --release --no-tree-shake-icons
 
-      - name: 🛠️ Build android
-        run: flutter build appbundle --release --no-tree-shake-icons
-
       - name: 🚚 Deploy web to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_WOMOSO }}"
-          channelId: live
           projectId: womoso
+
+      - name: 🛠️ Build android
+        run: flutter build appbundle --release --no-tree-shake-icons
 
       - name: 🚚 Deploy android to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{secrets.FIREBASE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WOMOSO }}
-          file: app/build/outputs/apk/release/app-release.aab
+          file: build/app/outputs/bundle/release/app-release.aab
