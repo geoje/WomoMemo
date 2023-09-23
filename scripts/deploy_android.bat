@@ -1,0 +1,1 @@
+firebase appdistribution:distribute ../build/app/outputs/bundle/release/app-release.aab --app 1:296416469462:android:e73ca6a4ac9a9aa06c4477 --testers "chchch1215@gmail.com"
