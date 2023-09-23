@@ -29,13 +29,3 @@ jobs:
         with:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_WOMOSO }}"
           projectId: womoso
-
-      - name: 🛠️ Build android
-        run: flutter build appbundle --release --no-tree-shake-icons
-
-      - name: 🚚 Deploy android to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{secrets.FIREBASE_APP_ID}}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WOMOSO }}
-          file: build/app/outputs/bundle/release/app-release.aab
