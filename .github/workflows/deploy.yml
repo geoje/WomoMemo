@@ -6,12 +6,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  web:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🚚 Get latest code
-        uses: actions/checkout@v3
+      - name: 📂 Get latest code
+        uses: actions/checkout@v4
 
       - name: 🍀 Use Flutter SDK
         uses: subosito/flutter-action@v2
@@ -21,13 +21,23 @@ jobs:
       - name: 📥 Install modules
         run: flutter pub get
 
-      - name: 🛠️ Build
+      - name: 🛠️ Build web
         run: flutter build web --release --no-tree-shake-icons
 
-      - name: 🚚 Deploy to firebase
+      - name: 🛠️ Build android
+        run: flutter build appbundle --release --no-tree-shake-icons
+
+      - name: 🚚 Deploy web to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_WOMOSO }}"
           channelId: live
           projectId: womoso
+
+      - name: 🚚 Deploy android to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{secrets.FIREBASE_APP_ID}}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          file: app/build/outputs/apk/release/app-release.aab
