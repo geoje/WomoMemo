@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:womomemo/models/memo.dart';
 import 'package:womomemo/models/navItem.dart';
 import 'package:womomemo/screens/memo_screen.dart';
@@ -32,79 +31,61 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, Memo> memos = {};
   String viewMode = "Memos";
-  late SharedPreferences prefs;
 
   @override
   void initState() {
     super.initState();
 
-    SharedPreferences.getInstance().then((value) {
-      prefs = value;
-      // First load and get from server
-      if (memos.isEmpty) {
-        memos = jsonDecode(prefs.getString("memos") ?? "{}");
-        setState(() {});
-      }
-      // First get from server and load
-      else {
-        prefs.setString("memos", jsonEncode(memos));
-      }
-    });
-
     if (!kIsWeb) HomeWidget.setAppGroupId(appGroupId);
 
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      setState(() {
-        Auth.user = user;
+      Auth.user = user;
 
-        if (user != null) {
-          // Get all memos
-          var memosRef = RTDB.instance.ref("memos/${user.uid}");
+      if (user != null) {
+        // Get all memos
+        var memosRef = RTDB.instance.ref("memos/${user.uid}");
 
-          // Set listener
-          memosRef.onValue.listen((event) {
-            // Refresh memo state
-            memos.clear();
-            for (final child in event.snapshot.children) {
-              Memo memo = Memo.fromSnapshot(child);
-              if (memo.delete != null) {
-                if (DateTime.now().difference(memo.delete!).inDays > 30) {
-                  RTDB.instance
-                      .ref("memos/${Auth.user!.uid}/${child.key!}")
-                      .remove();
-                  continue;
-                }
+        // Set listener
+        memosRef.onValue.listen((event) {
+          // Refresh memo state
+          memos.clear();
+          for (final child in event.snapshot.children) {
+            Memo memo = Memo.fromSnapshot(child);
+            if (memo.delete != null) {
+              if (DateTime.now().difference(memo.delete!).inDays > 30) {
+                RTDB.instance
+                    .ref("memos/${Auth.user!.uid}/${child.key!}")
+                    .remove();
+                continue;
               }
-              memos[child.key!] = memo;
             }
+            memos[child.key!] = memo;
+          }
 
-            // Update state
-            setState(() {});
+          // Update state
+          setState(() {});
 
-            // Push data to home widget
-            if (!kIsWeb) {
-              var homeWidgetMemos = {...memos};
-              homeWidgetMemos.removeWhere(
-                  (key, value) => value.archive || value.delete != null);
-              HomeWidget.saveWidgetData<String>(
-                  "memosJson", jsonEncode(homeWidgetMemos));
-              HomeWidget.updateWidget(
-                iOSName: iOSWidgetName,
-                androidName: androidWidgetName,
-              );
-            }
+          // Push data to home widget
+          if (!kIsWeb) {
+            var homeWidgetMemos = {...memos};
+            homeWidgetMemos.removeWhere(
+                (key, value) => value.archive || value.delete != null);
+            HomeWidget.saveWidgetData<String>(
+                "memosJson", jsonEncode(homeWidgetMemos));
+            HomeWidget.updateWidget(
+              iOSName: iOSWidgetName,
+              androidName: androidWidgetName,
+            );
+          }
+        });
 
-            // Save data to local storage
-            prefs.setString("memos", jsonEncode(memos));
-          });
-
-          // Delete listener
-          memosRef.onChildRemoved.listen((event) {
-            memos.remove(event.snapshot.key);
-            setState(() {});
-          });
-        }
-      });
+        // Delete listener
+        memosRef.onChildRemoved.listen((event) {
+          memos.remove(event.snapshot.key);
+          setState(() {});
+        });
+      }
+      setState(() {});
     });
   }
 
@@ -161,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: DrawerWidget(
             onDrawerClosed: () =>
                 widget.scaffoldKey.currentState!.closeDrawer(),
-            onLogout: () => handleLogout,
+            onLogout: handleLogout,
             viewMode: viewMode,
             onViewModeChanged: (newViewMode) =>
                 setState(() => viewMode = newViewMode)),
@@ -190,7 +171,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   handleLogout() {
-    memos = {};
+    setState(() {
+      memos = {};
+    });
     FirebaseAuth.instance.signOut();
   }
 

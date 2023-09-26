@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
@@ -100,9 +101,18 @@ class _DrawerWidgetState extends State<DrawerWidget> {
         const SizedBox(height: 10),
         Center(
           child: Auth.user == null
-              ? SignInButton(
-                  Buttons.Google,
-                  onPressed: handleLogin,
+              ? Column(
+                  children: [
+                    SignInButton(
+                      Buttons.Google,
+                      onPressed: handleLoginGoogle,
+                    ),
+                    const SizedBox(height: 10),
+                    SignInButton(
+                      Buttons.Microsoft,
+                      onPressed: handleLoginMicrosoft,
+                    ),
+                  ],
                 )
               : Text(
                   Auth.user!.displayName ?? "",
@@ -142,7 +152,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     );
   }
 
-  handleLogin() async {
+  handleLoginGoogle() async {
     if (kIsWeb) {
       await Auth.signInWithGoogle();
     } else if (!Platform.isWindows && !Platform.isLinux) {
@@ -165,6 +175,15 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           ),
         ),
       );
+    }
+  }
+
+  handleLoginMicrosoft() async {
+    final microsoftProvider = MicrosoftAuthProvider();
+    if (kIsWeb) {
+      await FirebaseAuth.instance.signInWithPopup(microsoftProvider);
+    } else {
+      await FirebaseAuth.instance.signInWithProvider(microsoftProvider);
     }
   }
 }
