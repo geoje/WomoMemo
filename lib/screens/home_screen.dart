@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:womomemo/models/memo.dart';
 import 'package:womomemo/models/navItem.dart';
 import 'package:womomemo/screens/memo_screen.dart';
@@ -30,12 +32,26 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, Memo> memos = {};
   String viewMode = "Memos";
+  late SharedPreferences prefs;
 
   @override
   void initState() {
     super.initState();
 
-    HomeWidget.setAppGroupId(appGroupId);
+    SharedPreferences.getInstance().then((value) {
+      prefs = value;
+      // First load and get from server
+      if (memos.isEmpty) {
+        memos = jsonDecode(prefs.getString("memos") ?? "{}");
+        setState(() {});
+      }
+      // First get from server and load
+      else {
+        prefs.setString("memos", jsonEncode(memos));
+      }
+    });
+
+    if (!kIsWeb) HomeWidget.setAppGroupId(appGroupId);
 
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       setState(() {
@@ -66,15 +82,20 @@ class _HomeScreenState extends State<HomeScreen> {
             setState(() {});
 
             // Push data to home widget
-            var homeWidgetMemos = {...memos};
-            homeWidgetMemos.removeWhere(
-                (key, value) => value.archive || value.delete != null);
-            HomeWidget.saveWidgetData<String>(
-                "memosJson", jsonEncode(homeWidgetMemos));
-            HomeWidget.updateWidget(
-              iOSName: iOSWidgetName,
-              androidName: androidWidgetName,
-            );
+            if (!kIsWeb) {
+              var homeWidgetMemos = {...memos};
+              homeWidgetMemos.removeWhere(
+                  (key, value) => value.archive || value.delete != null);
+              HomeWidget.saveWidgetData<String>(
+                  "memosJson", jsonEncode(homeWidgetMemos));
+              HomeWidget.updateWidget(
+                iOSName: iOSWidgetName,
+                androidName: androidWidgetName,
+              );
+            }
+
+            // Save data to local storage
+            prefs.setString("memos", jsonEncode(memos));
           });
 
           // Delete listener

@@ -49,11 +49,11 @@ class SearchWidget extends StatelessWidget {
                         padding: const EdgeInsets.all(1),
                         clipBehavior: Clip.hardEdge,
                         decoration: BoxDecoration(
-                          color: Colors.black.withAlpha(40),
+                          color: Colors.black.withAlpha(20),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: CircleAvatar(
-                          backgroundColor: Colors.black.withAlpha(40),
+                          backgroundColor: Colors.transparent,
                           backgroundImage: NetworkImage(Auth.user!.photoURL!),
                         ),
                       ),

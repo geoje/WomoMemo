@@ -87,12 +87,12 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   width: 120,
                   height: 120,
                   padding: const EdgeInsets.all(2),
-                  clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     color: Colors.black.withAlpha(20),
                     borderRadius: BorderRadius.circular(60),
                   ),
                   child: CircleAvatar(
+                    backgroundColor: Colors.transparent,
                     backgroundImage: NetworkImage(Auth.user!.photoURL!),
                   ),
                 ),
