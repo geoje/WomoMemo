@@ -49,7 +49,10 @@ class _MemoScreenState extends State<MemoScreen> {
 
     paletteTimer?.cancel();
     super.dispose();
-    if (removing) return;
+    if (removing ||
+        (titleController.text.isEmpty &&
+            contentController.text.isEmpty &&
+            checkItems.isEmpty)) return;
 
     memo.title = titleController.text;
     memo.content = contentController.text;

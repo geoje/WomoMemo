@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:womomemo/services/auth.dart';
 
 class SearchWidget extends StatelessWidget {
-  const SearchWidget({super.key, required this.openDrawer});
+  const SearchWidget(
+      {super.key, required this.openDrawer, required this.onTextFieldChanged});
 
   final void Function() openDrawer;
+  final void Function(String) onTextFieldChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +20,14 @@ class SearchWidget extends StatelessWidget {
           onPressed: openDrawer,
           icon: const Icon(Icons.menu),
         ),
-        const Expanded(
+        Expanded(
           flex: 1,
           child: TextField(
-            decoration: InputDecoration(
-                hintText: "Search your memos", border: InputBorder.none),
+            decoration: const InputDecoration(
+              hintText: "Search your memos",
+              border: InputBorder.none,
+            ),
+            onChanged: onTextFieldChanged,
           ),
         ),
         Auth.user == null

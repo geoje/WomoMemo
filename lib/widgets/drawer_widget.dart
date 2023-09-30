@@ -32,7 +32,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     return ListView(
       children: [
         SizedBox(
-          height: 60,
+          height: 64,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Row(
@@ -107,7 +107,6 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                       Buttons.Google,
                       onPressed: handleLoginGoogle,
                     ),
-                    const SizedBox(height: 10),
                     SignInButton(
                       Buttons.Microsoft,
                       onPressed: handleLoginMicrosoft,
@@ -123,8 +122,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   ),
                 ),
         ),
-        Center(child: Text(Auth.user?.email ?? "")),
-        const SizedBox(height: 60),
+        if (Auth.user != null) Center(child: Text(Auth.user?.email ?? "")),
+        const SizedBox(height: 40),
         for (var navItem in NavItem.items)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),

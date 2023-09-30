@@ -31,6 +31,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, Memo> memos = {};
   String viewMode = "Memos";
+  String search = "";
 
   @override
   void initState() {
@@ -99,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.white,
         title: SearchWidget(
           openDrawer: () => widget.scaffoldKey.currentState!.openDrawer(),
+          onTextFieldChanged: (text) => setState(() => search = text),
         ),
       ),
       body: memos.values.where((memo) => isVisible(viewMode, memo)).isEmpty
@@ -114,6 +116,9 @@ class _HomeScreenState extends State<HomeScreen> {
           : MasonryGridView.count(
               itemCount: memos.values
                   .where((memo) => isVisible(viewMode, memo))
+                  .where((memo) =>
+                      memo.title.contains(search) ||
+                      memo.content.contains(search))
                   .length,
               crossAxisCount: (MediaQuery.of(context).size.width / 200).floor(),
               mainAxisSpacing: 8,
@@ -122,6 +127,9 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (context, index) {
                 var entry = memos.entries
                     .where((entry) => isVisible(viewMode, entry.value))
+                    .where((entry) =>
+                        entry.value.title.contains(search) ||
+                        entry.value.content.contains(search))
                     .toList()[index];
                 return MemoWidget(memoKey: entry.key, memo: entry.value);
               },
@@ -178,7 +186,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   handleNew() async {
-    if (Auth.user == null) return;
+    if (Auth.user == null) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please login to use realtime memo!\nOffline mode will be supported later.",
+          ),
+        ),
+      );
+      return;
+    }
 
     var key = RTDB.instance.ref("memos/${Auth.user!.uid}").push().key;
     if (key == null) return;
